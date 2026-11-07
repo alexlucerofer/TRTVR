@@ -10,6 +10,12 @@ const seed = () => (seedPromise ||= fetch(chrome.runtime.getURL('data/seed.json'
 let localDb = null;
 const cache = new Map(); // url+hash -> {at, result} (evita reanalisar ao rolar a página)
 
+const DEFAULT_API = 'http://localhost:8787';
+async function getSettings() {
+  const s = await chrome.storage.local.get(['apiUrl', 'adminKey', 'autoImage', 'profile']);
+  return { apiUrl: (s.apiUrl || DEFAULT_API).replace(/\/$/, ''), adminKey: s.adminKey || '', autoImage: !!s.autoImage, profile: s.profile || null };
+}
+
 async function getConfig() {
   const s = await chrome.storage.local.get(['supabaseUrl', 'anonKey']);
   const d = self.ELO_DEFAULT_CONFIG || {};
@@ -49,6 +55,7 @@ async function analyzeJob(job, opts = {}) {
 
   const hist = await historySignals(job);
   const cfg = await getConfig();
+  const { profile } = await getSettings();
   // Feed social e Google: análise local primeiro; só vai ao servidor se houver sinal de risco ou clique.
   const localFirst = ['facebook', 'feed', 'google'].includes(job.source) && !opts.forceServer;
   let result = null, reason = null;
@@ -56,7 +63,7 @@ async function analyzeJob(job, opts = {}) {
   if (localFirst) {
     const pre = self.ELORules.analyze(job, { local_history: hist.signals });
     if (pre.level === 'sem_alertas' || pre.level === 'dados_insuficientes' || !cfg.url) {
-      result = await runLocal(job, hist, cfg.url ? 'análise local (sem sinais de risco; nada enviado ao servidor)' : 'Supabase não configurado');
+      result = await runLocal(job, hist, cfg.url ? 'análise local (sem sinais de risco; nada enviado ao servidor)' : 'Supabase não configurado', profile);
     }
   }
   if (!result && cfg.url && cfg.key) {
@@ -64,14 +71,14 @@ async function analyzeJob(job, opts = {}) {
       const r = await fetch(cfg.url + '/functions/v1/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', apikey: cfg.key, Authorization: 'Bearer ' + cfg.key },
-        body: JSON.stringify({ job, local_history: hist.signals }),
+        body: JSON.stringify({ job, local_history: hist.signals, profile }),
       });
       const data = await r.json();
       if (!r.ok) throw new Error(data.error || 'HTTP ' + r.status);
       result = data;
     } catch (e) { reason = 'falha ao consultar o Supabase: ' + e.message; }
   }
-  if (!result) result = await runLocal(job, hist, reason || 'Supabase não configurado');
+  if (!result) result = await runLocal(job, hist, reason || 'Supabase não configurado', profile);
 
   for (const n of hist.notes) result.verified.push({ item: 'Seu histórico (só neste navegador)', value: n, source: 'ELO local' });
   await remember(job, hist.phones);
@@ -79,10 +86,10 @@ async function analyzeJob(job, opts = {}) {
   return result;
 }
 
-async function runLocal(job, hist, reason) {
+async function runLocal(job, hist, reason, profile) {
   const s = await seed();
   localDb ||= self.ELOCore.memoryDb(s);
-  const r = await self.ELOCore.runAnalysis({ job, local_history: hist.signals }, { db: localDb, external: false, now: () => new Date() });
+  const r = await self.ELOCore.runAnalysis({ job, local_history: hist.signals, profile }, { db: localDb, external: false, now: () => new Date() });
   return { mode: 'local', mode_reason: reason, ...r };
 }
 
@@ -98,10 +105,61 @@ async function sendReport(payload) {
   return data;
 }
 
+// ---------- leitura de imagem pela API ELO (Claude Vision / Tesseract)
+// A imagem é baixada aqui no service worker (tem permissão de host) e enviada à API configurada no painel.
+const imageCache = new Map(); // src -> {at, result}
+async function imageBlob({ src, dataUrl }) {
+  const url = dataUrl || src;
+  if (!url || !/^(https?:|data:image\/)/.test(url)) throw new Error('endereço de imagem inválido');
+  // o ngrok gratuito mostra uma página de aviso sem este cabeçalho (demo online)
+  const r = await fetch(url, { credentials: 'omit', headers: url.startsWith('data:') ? {} : { 'ngrok-skip-browser-warning': '1' } });
+  if (!r.ok) throw new Error('não consegui baixar a imagem (HTTP ' + r.status + ')');
+  const b = await r.blob();
+  if (!/^image\//.test(b.type)) throw new Error('o endereço não devolveu uma imagem (' + (b.type || 'tipo desconhecido') + ')');
+  if (b.size > 5 * 1024 * 1024) throw new Error('imagem maior que 5 MB');
+  return b;
+}
+async function analyzeImage(msg) {
+  const key = msg.src && !msg.dataUrl ? msg.src + '|' + (msg.caption || '').length : null;
+  const hit = key && imageCache.get(key);
+  if (hit && Date.now() - hit.at < 30 * 60e3) return hit.result;
+  const { apiUrl, profile } = await getSettings();
+  const blob = await imageBlob(msg);
+  const fd = new FormData();
+  fd.append('arquivo', blob, 'anuncio.' + ((blob.type.split('/')[1] || 'png').replace('jpeg', 'jpg')));
+  if (msg.caption) fd.append('texto', String(msg.caption).slice(0, 3000));
+  if (msg.url && /^https?:/.test(msg.url)) fd.append('url', msg.url.slice(0, 2000));
+  if (profile) fd.append('perfil', JSON.stringify(profile));
+  let r;
+  try { r = await fetch(apiUrl + '/v1/analisar/imagem', { method: 'POST', body: fd, headers: { 'ngrok-skip-browser-warning': '1' } }); }
+  catch { throw new Error('API ELO fora do ar em ' + apiUrl + ' (rode "npm run api" ou ajuste no Painel)'); }
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.detail ? (typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail)) : 'HTTP ' + r.status);
+  const result = { ...data.analise, image_extraction: data.extraido, image_job: data.job, image_sha256: data.imagem_sha256 };
+  for (const n of (await historySignals(data.job)).notes) result.verified.push({ item: 'Seu histórico (só neste navegador)', value: n, source: 'ELO local' });
+  await remember(data.job, self.ELORules.extractContacts(data.job.description || '').phones);
+  if (key) imageCache.set(key, { at: Date.now(), result });
+  return result;
+}
+
+// menu de contexto: clique direito em qualquer imagem
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.create({ id: 'elo-image', title: 'Verificar esta imagem com o ELO', contexts: ['image'] });
+});
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+  if (info.menuItemId !== 'elo-image' || !tab || tab.id == null) return;
+  const tell = (m) => chrome.tabs.sendMessage(tab.id, m).catch(() => {});
+  tell({ type: 'imageProgress', src: info.srcUrl });
+  try { tell({ type: 'imageResult', src: info.srcUrl, result: await analyzeImage({ src: info.srcUrl, url: info.pageUrl }) }); }
+  catch (e) { tell({ type: 'imageError', src: info.srcUrl, error: String(e.message || e) }); }
+});
+
 chrome.runtime.onMessage.addListener((msg, sender, reply) => {
   (async () => {
     try {
       if (msg.type === 'analyze') return reply({ ok: true, result: await analyzeJob(msg.job, msg.opts) });
+      if (msg.type === 'analyzeImage') return reply({ ok: true, result: await analyzeImage(msg) });
+      if (msg.type === 'settings') { const s = await getSettings(); return reply({ ok: true, autoImage: s.autoImage, apiUrl: s.apiUrl }); }
       if (msg.type === 'report') return reply({ ok: true, result: await sendReport(msg.payload) });
       if (msg.type === 'status') { const c = await getConfig(); return reply({ ok: true, configured: !!(c.url && c.key), url: c.url }); }
       if (msg.type === 'clearHistory') { await chrome.storage.local.remove('history'); cache.clear(); return reply({ ok: true }); }

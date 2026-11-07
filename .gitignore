@@ -2,3 +2,7 @@
 node_modules/
 elo-extensao.zip
 tests/screens/
+api/.venv/
+api/data/
+__pycache__/
+.pytest_cache/

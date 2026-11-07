@@ -10,9 +10,9 @@
  */
 (function (root) {
   'use strict';
-
-  const RULES_VERSION = '2026.11.07-1';
-
+ 
+  const RULES_VERSION = '2026.11.07-2';
+ 
   // ------------------------------------------------------------------ fundamentos
   const LEGAL = {
     CF_1_III: { short: 'Constituição, art. 1º, III', citation: 'Constituição Federal de 1988, art. 1º, III (dignidade da pessoa humana) e art. 5º, III', summary: 'A dignidade da pessoa humana é fundamento da República; ninguém será submetido a tratamento desumano ou degradante.', url: 'https://www.planalto.gov.br/ccivil_03/constituicao/constituicao.htm' },
@@ -32,15 +32,15 @@
     MTE_CADASTRO: { short: 'MTE — Cadastro de Empregadores', citation: 'Cadastro de Empregadores que tenham submetido trabalhadores a condições análogas à de escravo (Portaria Interministerial MTPS/MMIRDH 4/2016 e atualizações)', summary: 'Lista pública de empregadores autuados, após decisão administrativa final.', url: 'https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/areas-de-atuacao/combate-ao-trabalho-escravo-e-analogo-ao-de-escravo' },
     LGPD: { short: 'LGPD', citation: 'Lei 13.709/2018', summary: 'Proteção de dados pessoais; o ELO só envia indicadores e link, nunca o perfil de quem publicou.', url: 'https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm' }
   };
-
+ 
   // ------------------------------------------------------------------ utilidades
   const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim();
-
+ 
   function snippet(original, idx, len) {
     const start = Math.max(0, idx - 40), end = Math.min(original.length, idx + len + 40);
     return (start > 0 ? '…' : '') + original.slice(start, end).replace(/\s+/g, ' ').trim() + (end < original.length ? '…' : '');
   }
-
+ 
   // procura padrões no texto normalizado; devolve trechos do texto original
   // (norm() preserva o comprimento quando só há acentos/espaços simples; usamos índice aproximado)
   // negações próximas anulam o trecho ("sem nenhum desconto", "não será descontado", "sem taxa")
@@ -61,7 +61,7 @@
     return [...new Set(hits)].slice(0, 3);
   }
   const has = (text, patterns) => findAll(text, patterns).length > 0;
-
+ 
   // --------------------------------------------------------------- vocabulário
   const P = {
     taxa: [/(pagar|pague|pagamento|deposit\w*|transferir|pix|boleto)[^.]{0,60}(taxa|inscri\w+|processo seletivo|visto|treinamento|curso|uniforme|exame|reserva da vaga|garantir (a|sua) vaga|documenta\w+)/, /(taxa|valor|custo) (de|da|do) (inscri\w+|cadastro|seletiv\w+|agenciamento|intermedia\w+|visto|reserva)/, /(caucao|investimento inicial)/, /(r\$|us\$|usd)\s?\d[^.]{0,30}(para|pra) (garantir|reservar|liberar) (a|sua)? ?vaga/],
@@ -75,12 +75,17 @@
     sem_experiencia: [/(sem|nao (precisa|exige|e necessari\w)( de)?) experiencia/, /(qualquer pessoa|nao precisa (de )?(estudo|formacao|ingles))/, /(treinamento|ensinamos) (tudo|do zero)/],
     contato_informal: [/whats ?app|wa\.me|zap\b|telegram|t\.me\/|chama (no|na) (privado|pv|dm|inbox)|direct|me chama/],
     contrato: [/contrato|clt|carteira assinada|registro em carteira|visto de trabalho|work permit|work visa|beneficios|vale[- ]transporte|ferias|jornada de (\d|trabalho)/],
-    promessa: [/(ganhe|ganhar|renda de) ate/, /(trabalho|servico) (facil|simples|leve)/, /(dinheiro|renda) (rapid\w+|facil|garantid\w+)/, /(enriquecer|mudar de vida|realizar seus sonhos)/, /salario (em|de) dolar/],
+    promessa: [/(ganhe|ganhar|renda de) ate/, /(trabalho|servico) (facil|simples|leve)/, /(dinheiro|renda) (rapid\w+|facil|garantid\w+)/, /(enriquecer|mudar de vida|realizar seus sonhos)/, /salario (em|de) dolar/, /salarios? atrativ\w+|otimos? salarios?|ganhos? (altos|atrativos)/],
     sexual: [/(fotos?|video)[^.]{0,30}(corpo inteiro|biquini|lingerie|sensua\w+)/, /(acompanhante|massagista|danc\w+|recepcionista|modelo|garconete)[^.]{0,60}(exterior|europa|asia|japao|espanha|portugal|tailandia|dubai)/, /(mulheres|mocas|meninas)[^.]{0,20}(18 a 2\d|jovens|bonitas)/],
-    vaga: [/\bvagas?\b|contrat(a|amos|ando)|emprego|oportunidade de trabalho|salario|trabalhe (no|na|em)|trabalhar (no|na|em|fora)|recrut\w+|processo seletivo|hiring|job offer|we are hiring|remuneracao|\bcargo\b/],
-    trabalho_digital: [/atendimento|suporte|customer service|call ?center|cripto|crypto|digitad\w+|marketing (digital|online)|bilingue|ingles|chat|vendas online|operador|moderador|ti\b|tecnologia|apostas|bets?\b|cassino|casino/]
+    vaga: [/candidat(e|ar|e-se|ura)|contratando|vagas? abert\w*|trabalhe conosco|oportunidades? de (emprego|trabalho)|\bvagas?\b|contrat(a|amos|ando)|emprego|oportunidade de trabalho|salario|trabalhe (no|na|em)|trabalhar (no|na|em|fora)|recrut\w+|processo seletivo|hiring|job offer|we are hiring|remuneracao|\bcargo\b/],
+    visto_turista: [/visto de turista|visto turistico|tourist visa|visa de turista|visado de turista|entra(r|mos)? como turista|visa on arrival/],
+    transfer_fronteira: [/(transfer|traslado|transporte|carro|van)[^.]{0,60}(fronteira|border|frontera|mae sot|myawaddy|outra cidade|another city|filial|escritorio parceiro|partner office)/, /(fronteira|border)[^.]{0,40}(tailandia|thailand|mianmar|myanmar|laos|camboja|cambodia)/, /zona economica especial|special economic zone|zona economica exclusiva/],
+    teste_digitacao: [/teste de digitacao|typing (test|speed|job)|digitar \d+ palavras|\d+ ?(wpm|palavras por minuto)|velocidade de digitacao/],
+    gratis_tudo: [/(hospedagem|alojamento|moradia|hotel|accommodation|housing|alojamiento)[^.]{0,40}(alimentacao|comida|refeic\w+|food|meals|comidas)[^.]{0,30}(gratis|gratuit\w+|free|inclus\w+|por conta)/, /(passagem|passagens|voo|flight|ticket|pasaje)[^.]{0,30}(gratis|gratuit\w+|free|pag[ao]s? pela empresa|paid by (the )?company|por conta da empresa)/],
+    faixa_etaria: [/(idade|age|edad)[^.]{0,15}(entre )?(1[8-9]|2\d) ?(a|e|-|to|y|até|ate) ?(2\d|3\d|40)( anos| years)?/, /(1[8-9]|2\d) (a|-) (3\d|40) anos/],
+    trabalho_digital: [/atendimento|suporte|customer service|call ?center|cripto|crypto|digitad\w+|marketing (digital|online)|bilingue|ingles|chat|vendas online|operador|moderador|ti\b|tecnologia|apostas|bets?\b|cassino|casino|digitacao|typing|relacionamento online|investimentos? online/]
   };
-
+ 
   // ---- inglês (en) e espanhol (es): mesmos indicadores, outras línguas
   const ML = {
     taxa: [/(pay|deposit|transfer|send)[^.]{0,50}(fee|visa|training|processing|registration|deposit)/, /(processing|registration|visa|recruitment|placement|booking) fee/, /(pagar|pague|deposit\w+|transferir)[^.]{0,50}(tasa|cuota|visado|inscripcion|curso|tramite)/, /(tasa|cuota) de (inscripcion|tramite|visado|reserva)/],
@@ -99,7 +104,7 @@
     trabalho_digital: [/typist|data entry|online sales|chat support|customer support|soporte|atencion al cliente/]
   };
   for (const k of Object.keys(ML)) P[k] = P[k].concat(ML[k]);
-
+ 
   // detecção simples de idioma por palavras frequentes (sem rede)
   function detectLang(text) {
     const n = ' ' + norm(text).replace(/[^a-z ]/g, ' ') + ' ';
@@ -109,12 +114,12 @@
     return best[1] >= 2 ? best[0] : 'pt';
   }
   const LANG_NAME = { pt: 'português', en: 'inglês', es: 'espanhol' };
-
-  const SEA = /(tailandia|thailand|bangkok|mae sot|chiang|camboja|cambodia|phnom penh|sihanoukville|mianmar|myanmar|birmania|myawaddy|laos|vientiane|filipinas|philippines|manila|vietna|vietnam|malasia|malaysia|dubai \(transito\))/;
+ 
+  const SEA = /(tailandia|thailand|bangkok|mae sot|chiang|camboja|cambodia|phnom penh|sihanoukville|mianmar|myanmar|birmania|myawaddy|shwe kokko|kk park|golden triangle|triangulo dourado|bokeo|laos|vientiane|filipinas|philippines|manila|vietna|vietnam|malasia|malaysia|dubai \(transito\))/;
   const EXTERIOR = /(exterior|fora do brasil|abroad|overseas|extranjero|thailand|cambodia|myanmar|uae|japan|spain|united states|usa|uk|germany|ireland|australia|qatar|saudi|europa|asia|eua|estados unidos|canada|japao|portugal|espanha|italia|inglaterra|reino unido|dubai|emirados|tailandia|camboja|mianmar|laos|china|coreia|australia|irlanda|alemanha|franca|suica|israel|chile|argentina|paraguai|bolivia)/;
   const PHONE_CC = { '66': 'Tailândia', '855': 'Camboja', '95': 'Mianmar', '856': 'Laos', '63': 'Filipinas', '84': 'Vietnã', '60': 'Malásia', '971': 'Emirados Árabes', '34': 'Espanha', '351': 'Portugal', '1': 'EUA/Canadá', '44': 'Reino Unido', '55': 'Brasil', '86': 'China' };
   const COUNTRY_WORDS = { 'Tailândia': /tailandia|thailand|bangkok/, 'Camboja': /camboja|cambodia/, 'Mianmar': /mianmar|myanmar/, 'Laos': /laos/, 'Filipinas': /filipinas|philippines/, 'Vietnã': /vietna|vietnam/, 'Malásia': /malasia|malaysia/, 'Emirados Árabes': /dubai|emirados|abu dhabi|uae/, 'Espanha': /espanha|madri|barcelona|spain/, 'Portugal': /portugal|lisboa|porto\b/, 'EUA/Canadá': /eua|estados unidos|canada|usa\b/, 'Reino Unido': /reino unido|inglaterra|londres/, 'Brasil': /brasil|sao paulo|rio de janeiro|\b[a-z]+\/(sp|rj|mg|pr|sc|rs|ba|pe|ce|go|df|mt|ms|pa|am|to)\b/, 'China': /china/ };
-
+ 
   // salário: retorna o maior valor mensal aproximado em BRL encontrado
   // Taxas de referência FIXAS e aproximadas (documentadas no README), só para ordem de grandeza.
   const FX = { brl: 1, usd: 5.5, eur: 6, gbp: 7, thb: 0.16, aed: 1.5 };
@@ -141,7 +146,7 @@
     }
     return best;
   }
-
+ 
   function phoneCountries(text) {
     const out = new Set();
     const re = /\+\s?(\d{1,3})[\s-]?\(?\d/g; let m;
@@ -168,7 +173,7 @@
   function domainOf(url) {
     try { return new URL(url).hostname.replace(/^www\./, '').toLowerCase(); } catch (e) { return null; }
   }
-
+ 
   // similaridade de texto (Jaccard de trigramas de palavras)
   function shingles(text) {
     const w = norm(text).replace(/[^a-z0-9 ]/g, ' ').split(' ').filter((x) => x.length > 2);
@@ -185,14 +190,14 @@
     for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
     return h.toString(16).padStart(8, '0');
   }
-
+ 
   function isJobLike(text) {
     const n = norm(text);
     if (n.length < 40) return false;
     const hits = P.vaga.reduce((t, re) => t + (n.match(new RegExp(re.source, 'g')) || []).length, 0);
-    return hits >= 1 && (hits >= 2 || has(n, [/salario|salary|r\$|us\$|usd|ganhe|earn|gana|remuneracao|beneficios|benefits|requisitos|requirements|whats ?app|telegram|interessad|apply/]));
+    return hits >= 1 && (hits >= 2 || has(n, [/candidat|inscri|link|curriculo|salario|salary|r\$|us\$|usd|ganhe|earn|gana|remuneracao|beneficios|benefits|requisitos|requirements|whats ?app|telegram|interessad|apply/]));
   }
-
+ 
   // ------------------------------------------------------------------ indicadores
   // Cada indicador: id, título, severidade, fundamento, e função test(ctx) -> {evidence[], note} | null
   const INDICATORS = [
@@ -218,7 +223,7 @@
       description: 'Oferta de levar o trabalhador para fazenda, obra, garimpo ou outro estado com alojamento no local. É o padrão de aliciamento mais comum nos resgates no Brasil; atenção redobrada se houver dívida ou falta de contrato.',
       test: (c) => { const e = findAll(c.text, P.alojamento_isolado); return e.length && (!c.hasContract || c.alertCount > 0) ? { evidence: e } : null; } },
     { id: 'PADRAO_SUDESTE_ASIATICO', title: 'Padrão de aliciamento para centros de golpes (Sudeste Asiático)', severity: 'alto', basis: ['ONU_SEA_2023', 'PF_SEA_2026', 'CP_149A', 'CP_206'],
-      description: 'Combinação documentada pela ONU, Itamaraty e Polícia Federal: vaga de atendimento/digital/cripto no Sudeste Asiático, sem exigir experiência ou com salário alto, e contato por mensageiro. O destino SOZINHO não gera alerta.',
+      description: 'Combinação documentada pela ONU, Itamaraty e Polícia Federal: vaga de atendimento/digital/cripto no Sudeste Asiático, sem exigir experiência ou com salário alto, e contato por mensageiro; muitas vezes entrada com visto de turista e transferência por terra até a fronteira (Mae Sot/Myawaddy, Sihanoukville, Triângulo Dourado). O destino SOZINHO não gera alerta.',
       test: (c) => {
         if (!c.sea) return null;
         const extras = [];
@@ -226,9 +231,14 @@
         if (c.noExperience) extras.push('não exige experiência');
         if (c.highSalary) extras.push('salário muito acima do usual (' + c.salary.raw + ')');
         if (c.informalContact) extras.push('contato só por mensageiro');
-        if (c.paidTrip) extras.push('viagem paga pela empresa');
+        if (c.paidTrip) extras.push('viagem/hospedagem pagas pela empresa');
+        if (c.touristVisa) extras.push('entrada com visto de TURISTA para trabalhar');
+        if (c.borderTransfer) extras.push('transferência por terra para fronteira/outra cidade');
+        if (c.typingTest) extras.push('seleção por teste de digitação');
+        if (c.ageRange) extras.push('faixa etária jovem exigida');
         if (extras.length < 2) return null;
-        return { evidence: findAll(c.text, [SEA]).concat(['Combinação: ' + extras.join(' + ')]) };
+        const ev = findAll(c.text, [SEA].concat(P.visto_turista, P.transfer_fronteira)).slice(0, 2);
+        return { evidence: ev.concat(['Combinação: ' + extras.join(' + ')]) };
       } },
     { id: 'SINAIS_EXPLORACAO_SEXUAL', title: 'Sinais associados a aliciamento para exploração sexual', severity: 'alto', basis: ['CP_149A', 'OIT_OPERACIONAIS'],
       description: 'Pedido de fotos de corpo/biquíni, ou vagas de "modelo/dançarina/acompanhante" no exterior voltadas a mulheres jovens.',
@@ -270,7 +280,7 @@
       test: (c) => ((c.facts.registry_matches || []).length ? { evidence: c.facts.registry_matches.map((r) => r.employer_name + (r.uf ? ' (' + r.uf + ')' : '') + ' — ' + r.source + (r.is_demo ? ' [DADO FICTÍCIO DE DEMONSTRAÇÃO]' : '')) } : null) }
   ];
   const WEIGHT = { critico: 4, alto: 3, medio: 2, info: 0 };
-
+ 
   /**
    * job: { title, company, description, location, salary, url, source, preliminary? }
    * facts (opcional, do servidor/histórico): {
@@ -289,18 +299,22 @@
     const c = {
       job, text, facts, preliminary, salary,
       sea: SEA.test(n),
-      abroad: EXTERIOR.test(n) && !/(trabalho remoto|home ?office)/.test(n),
+      abroad: (EXTERIOR.test(n) || SEA.test(n)) && !/(trabalho remoto|home ?office)/.test(n),
       digitalWork: has(n, P.trabalho_digital),
       noExperience: has(n, P.sem_experiencia),
       highSalary: !!salary && salary.brl >= 9000,
       informalContact: has(n, P.contato_informal),
       corporateChannel: contacts.emails.some((e) => !FREE_MAIL.test(e)) || !!(facts.company_record && facts.company_record.domain),
       hasContract: has(n, P.contrato),
-      paidTrip: has(n, [/(passagem|viagem|voo|hospedagem)[^.]{0,30}(paga|gratis|por conta da empresa|inclus\w+)/]),
+      paidTrip: has(n, [/(passagem|viagem|voo|hospedagem)[^.]{0,30}(paga|gratis|por conta da empresa|inclus\w+)/]) || P.gratis_tudo.some((re) => re.test(n)),
+      touristVisa: has(n, P.visto_turista),
+      borderTransfer: has(n, P.transfer_fronteira),
+      typingTest: has(n, P.teste_digitacao),
+      ageRange: P.faixa_etaria.some((re) => re.test(n)),
       contradictions: [],
       alertCount: 0
     };
-
+ 
     // --- contradições verificáveis
     const claimed = Object.keys(COUNTRY_WORDS).filter((k) => COUNTRY_WORDS[k].test(norm([job.location, job.title, job.description].join(' '))));
     const phoneC = phoneCountries(text);
@@ -311,7 +325,7 @@
     if (facts.cnpj && facts.cnpj.situacao && !/ativa/i.test(facts.cnpj.situacao)) c.contradictions.push('CNPJ informado está com situação "' + facts.cnpj.situacao + '" na Receita Federal.');
     if (facts.cnpj && facts.cnpj.razao_social && job.company && similarity(facts.cnpj.razao_social + ' x y', job.company + ' x y') === 0 && !norm(facts.cnpj.razao_social).includes(norm(job.company).split(' ')[0])) c.contradictions.push('CNPJ do anúncio pertence a "' + facts.cnpj.razao_social + '", não a "' + job.company + '".');
     if (facts.company_record && facts.company_record.verification_status === 'inconsistente') c.contradictions.push('Empresa marcada como inconsistente na base ELO (' + facts.company_record.source + ').');
-
+ 
     // --- dispara indicadores (duas passadas: alguns dependem da contagem)
     const alerts = [];
     for (const pass of [1, 2]) {
@@ -325,7 +339,7 @@
         }
       }
     }
-
+ 
     // --- informações verificadas
     const verified = [];
     if (facts.company_record) verified.push({ item: 'Empresa na base ELO', value: facts.company_record.name + ' — ' + labelStatus(facts.company_record.verification_status) + (facts.company_record.is_demo ? ' [fictícia, demonstração]' : ''), source: facts.company_record.source });
@@ -335,7 +349,7 @@
     if (facts.gleif_match) verified.push({ item: 'Registro internacional (LEI)', value: facts.gleif_match, source: 'GLEIF' });
     if (facts.approved_reports) verified.push({ item: 'Relatos moderados', value: facts.approved_reports + ' relato(s) aprovado(s) pela moderação — relatos não alteram o nível de risco sozinhos', source: 'ELO' });
     if (salary) verified.push({ item: 'Salário identificado', value: salary.raw + (salary.currency !== 'BRL' ? ' (≈ R$ ' + salary.brl.toLocaleString('pt-BR') + '/mês, câmbio de referência)' : ''), source: 'Texto do anúncio' });
-
+ 
     // --- informações insuficientes
     const insufficient = [];
     if (!job.company) insufficient.push('Nome da empresa não aparece no anúncio.');
@@ -346,7 +360,7 @@
     if (facts.domain && facts.domain_age_days == null && facts.domain_checked) insufficient.push('Não foi possível consultar a idade do domínio ' + facts.domain + '.');
     if (preliminary) insufficient.push('Análise preliminar: só título/resumo disponíveis. Abra o anúncio completo para análise detalhada.');
     if (c.abroad) insufficient.push('Confirme a empresa e o visto com o consulado/embaixada do Brasil no país antes de viajar.');
-
+ 
     // --- nível
     const score = alerts.reduce((s, a) => s + WEIGHT[a.severity], 0);
     const critical = alerts.filter((a) => a.severity === 'critico').length;
@@ -354,14 +368,46 @@
     if (!alerts.length) level = insufficient.length >= 3 ? 'dados_insuficientes' : 'sem_alertas';
     else if ((critical >= 1 && alerts.length >= 2) || score >= 7) level = 'alto_risco';
     else level = 'atencao';
-
+ 
     const justification = buildJustification(level, alerts, preliminary);
     if (lang !== 'pt') verified.push({ item: 'Idioma do anúncio', value: LANG_NAME[lang] + ' — analisado também com as regras em ' + LANG_NAME[lang], source: 'Detecção automática' });
-    return { level, preliminary, lang, lang_name: LANG_NAME[lang], abroad: c.abroad, score, indicators: alerts, verified, insufficient, justification, rules_version: RULES_VERSION, content_hash: contentHash(text), salary };
+    const theme = jobTheme(text);
+    const profile_notes = profileNotes(facts.profile, c, theme);
+    for (const pn of profile_notes) verified.push({ item: 'Seu perfil', value: pn, source: 'Painel ELO (só neste navegador)' });
+    return { level, preliminary, theme, profile_notes, regions: jobRegions(n), lang, lang_name: LANG_NAME[lang], abroad: c.abroad, score, indicators: alerts, verified, insufficient, justification, rules_version: RULES_VERSION, content_hash: contentHash(text), salary };
+  }
+ 
+  // ------------------------------------------------------------------ perfil (área de interesse e região)
+  // profile: { areas: ['atendimento','ti',...], origem_uf: 'SP', regioes: ['sudeste_asiatico','europa',...] }
+  // Gera NOTAS (nunca alertas): o perfil não muda o nível de risco.
+  const REGION_RE = {
+    brasil: /brasil|\b[a-z ]+\/(sp|rj|mg|pr|sc|rs|ba|pe|ce|go|df|mt|ms|pa|am|to|es|pb|rn|al|se|pi|ma|ro|ac|ap|rr)\b/,
+    america_do_sul: /argentina|chile|paraguai|uruguai|bolivia|peru|colombia|venezuela|guiana|suriname/,
+    europa: /europa|portugal|espanha|italia|franca|alemanha|irlanda|reino unido|inglaterra|suica|holanda|belgica|lisboa|madri|girona/,
+    america_do_norte: /eua|estados unidos|usa\b|canada|mexico/,
+    oriente_medio: /dubai|emirados|catar|qatar|arabia|israel|kuwait|oma\b|bahrein/,
+    sudeste_asiatico: SEA,
+    asia_leste: /japao|japan|china|coreia|korea|taiwan/
+  };
+  const REGION_NAME = { brasil: 'Brasil', america_do_sul: 'América do Sul', europa: 'Europa', america_do_norte: 'América do Norte', oriente_medio: 'Oriente Médio', sudeste_asiatico: 'Sudeste Asiático', asia_leste: 'Ásia (Japão, China, Coreia)' };
+  const AREA_NAME = { atendimento: 'atendimento/call center', ti: 'TI/tecnologia', marketing_digital: 'marketing digital', agro: 'agro/trabalho rural', construcao: 'construção', hotelaria: 'hotelaria/restaurante', domestico: 'doméstico/cuidador', beleza_entretenimento: 'beleza/entretenimento', outra: 'outra' };
+  function jobRegions(n) { return Object.keys(REGION_RE).filter((k) => REGION_RE[k].test(n)); }
+  function profileNotes(profile, c, theme) {
+    if (!profile || typeof profile !== 'object') return [];
+    const areas = Array.isArray(profile.areas) ? profile.areas : [];
+    const regioes = Array.isArray(profile.regioes) ? profile.regioes : [];
+    const n = norm(c.text), notes = [];
+    const here = jobRegions(n).filter((r) => regioes.includes(r));
+    if (here.length) notes.push('Esta vaga é numa região que você marcou como interesse (' + here.map((r) => REGION_NAME[r]).join(', ') + ').');
+    const digitalArea = areas.some((a) => ['atendimento', 'ti', 'marketing_digital'].includes(a));
+    if (c.sea && digitalArea) notes.push('Atenção: pessoas jovens da área de ' + areas.filter((a) => ['atendimento', 'ti', 'marketing_digital'].includes(a)).map((a) => AREA_NAME[a]).join('/') + ' são o perfil MAIS procurado por aliciadores de centros de golpes no Sudeste Asiático (Itamaraty, ONU). Confirme a empresa com a embaixada antes de qualquer passo.');
+    else if (regioes.includes('sudeste_asiatico') && digitalArea && c.abroad && !c.sea) notes.push('Você marcou interesse no Sudeste Asiático: desconfie de vagas de atendimento/TI com salário em dólar e viagem paga.');
+    if (c.abroad && profile.origem_uf) notes.push('Antes de viajar, procure o Posto Avançado / Núcleo de Enfrentamento ao Tráfico de Pessoas do seu estado (' + String(profile.origem_uf).slice(0, 2).toUpperCase() + ').');
+    return notes.slice(0, 3);
   }
 
   function labelStatus(s) { return { verificada: 'verificada', nao_verificada: 'não verificada', inconsistente: 'inconsistente', demonstracao: 'demonstração' }[s] || s; }
-
+ 
   function buildJustification(level, alerts, preliminary) {
     const pre = preliminary ? 'Análise preliminar. ' : '';
     if (level === 'sem_alertas') return pre + 'Não encontramos sinais de risco nas informações disponíveis. Isso não garante que a vaga seja segura: confirme sempre a empresa e o contrato.';
@@ -370,19 +416,32 @@
     const base = pre + 'Encontramos ' + alerts.length + ' sinal(is) que a OIT e a lei brasileira associam a recrutamento enganoso: ' + names + '. Isso NÃO prova crime nem acusa a empresa; indica que a oferta precisa ser verificada antes de qualquer passo.';
     return level === 'alto_risco' ? base + ' Mesmo que você aceite a proposta, o consentimento obtido por engano não vale (Protocolo de Palermo): não envie documentos nem dinheiro e procure orientação.' : base;
   }
-
+ 
+  // tema da vaga (ocupações) e cidade — usados para buscar vagas reais do mesmo tema
+  const OCC = ['merendeira', 'auxiliar de limpeza', 'auxiliar de sala', 'porteiro', 'vendedor', 'vendedora', 'atendente', 'recepcionista', 'motorista', 'cozinheiro', 'cozinheira', 'auxiliar de cozinha', 'garcom', 'garconete', 'auxiliar administrativo', 'assistente administrativo', 'operador de caixa', 'repositor', 'estoquista', 'auxiliar de producao', 'operador de telemarketing', 'baba', 'cuidador', 'cuidadora de idosos', 'pedreiro', 'servente', 'eletricista', 'soldador', 'tecnico de enfermagem', 'enfermeiro', 'professor', 'camareira', 'faxineira', 'diarista', 'jardineiro', 'vigilante', 'seguranca', 'entregador', 'montador', 'auxiliar de logistica', 'conferente', 'empacotador', 'jovem aprendiz', 'estagio', 'operador de maquinas', 'trabalhador rural', 'safrista', 'atendimento ao cliente', 'customer service', 'suporte', 'marketing digital', 'recepcionista de hotel', 'modelo', 'operador de colheita', 'camarero'];
+  const CITIES = ['sao paulo', 'rio de janeiro', 'brasilia', 'belo horizonte', 'salvador', 'fortaleza', 'recife', 'curitiba', 'porto alegre', 'manaus', 'belem', 'goiania', 'campinas', 'guarulhos', 'sao luis', 'natal', 'joao pessoa', 'maceio', 'teresina', 'florianopolis', 'vitoria', 'cuiaba', 'campo grande', 'rio verde', 'bangkok', 'dubai', 'lisboa', 'porto', 'madri', 'girona'];
+  function jobTheme(text) {
+    const n = norm(text);
+    const occ = OCC.filter((o) => new RegExp('\\b' + o + '\\b').test(n)).slice(0, 3);
+    const city = CITIES.find((c) => new RegExp('\\b' + c + '\\b').test(n)) || null;
+    return { occupations: occ, city };
+  }
+ 
   // sugestão de vagas parecidas: pontua oportunidades por categoria/palavras
-  function rankAlternatives(job, opportunities, limit) {
+  const AREA_CATS = { atendimento: ['atendimento'], ti: ['atendimento', 'tecnologia'], marketing_digital: ['atendimento', 'marketing'], agro: ['agro'], construcao: ['construcao', 'logistica'], hotelaria: ['hotelaria'], domestico: ['domestico'], beleza_entretenimento: [], outra: [] };
+  function rankAlternatives(job, opportunities, limit, profile) {
     const jt = norm([job.title, job.description].join(' '));
+    const cats = [].concat(...((profile && Array.isArray(profile.areas) ? profile.areas : []).map((a) => AREA_CATS[a] || [])));
     return (opportunities || []).map((o) => {
       const words = norm([o.title, o.category, o.requirements].join(' ')).split(/\W+/).filter((w) => w.length > 3);
       let s = 0; for (const w of new Set(words)) if (jt.includes(w)) s++;
       if (o.category && jt.includes(norm(o.category))) s += 2;
+      if (o.category && cats.includes(o.category)) s += 2;
       return { o, s };
-    }).filter((x) => x.o.kind === 'emprego').sort((a, b) => b.s - a.s).slice(0, limit || 3).map((x) => x.o);
+    }).filter((x) => x.o.kind === 'emprego' && x.s > 0).sort((a, b) => b.s - a.s).slice(0, limit || 3).map((x) => x.o);
   }
-
-  const api = { detectLang, LANG_NAME, RULES_VERSION, LEGAL, INDICATORS, analyze, isJobLike, similarity, contentHash, parseSalaryBRL, extractCNPJ, extractContacts, domainOf, rankAlternatives, norm };
+ 
+  const api = { jobTheme, profileNotes, jobRegions, REGION_NAME, AREA_NAME, detectLang, LANG_NAME, RULES_VERSION, LEGAL, INDICATORS, analyze, isJobLike, similarity, contentHash, parseSalaryBRL, extractCNPJ, extractContacts, domainOf, rankAlternatives, norm };
   root.ELORules = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

@@ -1,6 +1,6 @@
 {
   "name": "elo",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "ELO — prevenção ao tráfico de pessoas e ao trabalho escravo via ofertas de emprego enganosas",
   "scripts": {
@@ -8,6 +8,13 @@
     "test": "node --test tests/rules.test.js",
     "test:e2e": "node tests/e2e.js",
     "demo": "python3 -m http.server 8080 --directory demo",
-    "zip": "cd extension && zip -qr ../elo-extensao.zip ."
+    "zip": "rm -f elo-extensao.zip && cd extension && zip -qr ../elo-extensao.zip .",
+    "flyers": "node scripts/build-flyers.js",
+    "api": "cd api && .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8787 --reload $( [ -f ../.env ] && echo --env-file ../.env )",
+    "api:setup": "python3 -m venv api/.venv && api/.venv/bin/pip install -r api/requirements.txt",
+    "test:api": "api/.venv/bin/python -m pytest api/tests -q"
+  },
+  "devDependencies": {
+    "playwright": "^1.49.1"
   }
 }

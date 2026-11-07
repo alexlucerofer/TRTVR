@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ELO — Painel</title>
+<style>
+  :root{--bg:#f6f7f9;--card:#fff;--ink:#101828;--muted:#5d6676;--line:#e4e7ec;--accent:#0f766e;--high:#b42318;--mid:#b54708;--ok:#067647;--info:#475467;--field:#fff}
+  @media (prefers-color-scheme: dark){:root{--bg:#0d1117;--card:#161b22;--ink:#e6edf3;--muted:#9aa4b2;--line:#30363d;--accent:#2dd4bf;--high:#f97066;--mid:#fdb022;--ok:#47cd89;--info:#98a2b3;--field:#0d1117}}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  header{background:var(--card);border-bottom:1px solid var(--line);padding:14px 16px} header h1{margin:0;font-size:20px} header p{margin:2px 0 0;color:var(--muted);font-size:13px}
+  main{max-width:960px;margin:0 auto;padding:16px}
+  .tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:16px}
+  .tab{all:unset;cursor:pointer;padding:10px 14px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1px}
+  .tab[aria-selected=true]{color:var(--ink);border-bottom-color:var(--accent)} .tab:focus-visible{outline:2px solid var(--accent)}
+  [role=tabpanel][hidden]{display:none}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+  h2{font-size:17px;margin:0 0 4px} .muted{color:var(--muted);font-size:13px}
+  label{display:block;font-weight:600;margin:12px 0 6px} fieldset{border:0;padding:0;margin:12px 0}
+  legend{font-weight:600;margin-bottom:6px} .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chips label{display:inline-flex;align-items:center;gap:6px;margin:0;font-weight:500;border:1px solid var(--line);border-radius:999px;padding:6px 12px;cursor:pointer;background:var(--field)}
+  .chips input:checked + span{color:var(--accent);font-weight:700}
+  input[type=text],input[type=url],input[type=password],select,textarea{width:100%;padding:9px;border:1px solid var(--line);border-radius:8px;font:inherit;background:var(--field);color:var(--ink)}
+  textarea{min-height:90px}
+  button.b{margin-top:12px;padding:9px 14px;border-radius:8px;border:0;background:var(--accent);color:#fff;font:600 14px system-ui;cursor:pointer} button.b.sec{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  button.b:disabled{opacity:.6}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:end} .row > *{flex:1;min-width:160px}
+  .drop{border:2px dashed var(--line);border-radius:12px;padding:22px;text-align:center;cursor:pointer} .drop.on{border-color:var(--accent)} .drop img{max-width:100%;max-height:280px;border-radius:8px;margin-top:10px}
+  .lvl{font-weight:800} .alto_risco{color:var(--high)} .atencao{color:var(--mid)} .sem_alertas{color:var(--ok)} .dados_insuficientes{color:var(--info)}
+  table{width:100%;border-collapse:collapse;font-size:14px} th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);vertical-align:top} th{color:var(--muted);font-weight:600}
+  .tbl{overflow-x:auto} tr.sel{background:color-mix(in srgb,var(--accent) 10%,transparent)} td a{color:var(--accent);cursor:pointer}
+  dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;font-size:14px} dt{color:var(--muted)} dd{margin:0;overflow-wrap:anywhere}
+  pre{white-space:pre-wrap;font-size:12.5px;background:var(--bg);border-radius:8px;padding:10px;max-height:260px;overflow:auto}
+  .ind{border-top:1px solid var(--line);padding:8px 0} .ind:first-child{border-top:0}
+  .out{white-space:pre-wrap;margin-top:10px} .err{color:var(--high)} .okc{color:var(--ok)}
+  .pill{display:inline-block;font-size:12px;border-radius:999px;padding:2px 8px;background:var(--bg);border:1px solid var(--line)}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:14px} @media (max-width:760px){.cols{grid-template-columns:1fr}}
+</style></head>
+<body>
+<header><h1>ELO — Painel</h1><p>Seu perfil, leitura de imagens de anúncios e gestão das análises. Nada aqui é obrigatório.</p></header>
+<main>
+  <div class="tabs" role="tablist" aria-label="Painel ELO">
+    <button class="tab" role="tab" id="t-perfil" aria-controls="p-perfil" aria-selected="true">Meu perfil</button>
+    <button class="tab" role="tab" id="t-img" aria-controls="p-img" aria-selected="false" tabindex="-1">Analisar imagem</button>
+    <button class="tab" role="tab" id="t-hist" aria-controls="p-hist" aria-selected="false" tabindex="-1">Histórico</button>
+    <button class="tab" role="tab" id="t-rev" aria-controls="p-rev" aria-selected="false" tabindex="-1">Revisar</button>
+    <button class="tab" role="tab" id="t-cfg" aria-controls="p-cfg" aria-selected="false" tabindex="-1">Configurações</button>
+  </div>
+
+  <section role="tabpanel" id="p-perfil" aria-labelledby="t-perfil">
+    <div class="card">
+      <h2>Área de interesse e região</h2>
+      <p class="muted">Usado para avisos personalizados (por exemplo: "seu perfil é o mais procurado por aliciadores nesta região") e para sugerir vagas reais da sua área. <b>Não muda o nível de risco</b> e fica só neste navegador; vai junto com cada análise apenas como códigos (sem nome, e-mail ou telefone).</p>
+      <fieldset><legend>Áreas de interesse</legend><div class="chips" id="areas"></div></fieldset>
+      <fieldset><legend>Regiões onde você procura trabalho</legend><div class="chips" id="regioes"></div></fieldset>
+      <div class="row"><div><label for="uf">Estado onde você mora (UF)</label><select id="uf"><option value="">Prefiro não informar</option></select></div></div>
+      <button class="b" id="save-perfil" type="button">Salvar perfil</button> <button class="b sec" id="clear-perfil" type="button">Apagar perfil</button>
+      <div class="out muted" id="out-perfil" role="status"></div>
+    </div>
+  </section>
+
+  <section role="tabpanel" id="p-img" aria-labelledby="t-img" hidden>
+    <div class="cols">
+      <div class="card">
+        <h2>Enviar imagem de anúncio</h2>
+        <p class="muted">Panfletos e prints de posts. A API ELO lê a imagem (Claude Vision, ou OCR local) e aplica as mesmas regras da extensão. A imagem não é guardada.</p>
+        <div class="drop" id="drop" tabindex="0" role="button" aria-label="Escolher imagem">Arraste, cole (Ctrl+V) ou clique para escolher (até 5 MB)<input id="file" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden><div id="prev"></div></div>
+        <label for="cap">Legenda do post (opcional)</label><textarea id="cap" maxlength="3000" placeholder="Texto publicado junto com a imagem"></textarea>
+        <button class="b" id="go-img" type="button">Analisar imagem</button>
+        <div class="out" id="out-img-err" role="status"></div>
+      </div>
+      <div class="card" id="res-img"><p class="muted">O resultado aparece aqui.</p></div>
+    </div>
+  </section>
+
+  <section role="tabpanel" id="p-hist" aria-labelledby="t-hist" hidden>
+    <div class="card">
+      <div class="row">
+        <div><label for="f-nivel">Nível</label><select id="f-nivel"><option value="">Todos</option><option value="alto_risco">Alto risco</option><option value="atencao">Atenção</option><option value="dados_insuficientes">Dados insuficientes</option><option value="sem_alertas">Sem alertas</option></select></div>
+        <div><label for="f-regiao">Região</label><select id="f-regiao"><option value="">Todas</option></select></div>
+        <div><label for="f-q">Busca</label><input id="f-q" type="text" placeholder="empresa, cargo, texto"></div>
+        <div style="flex:0"><button class="b" id="go-hist" type="button">Filtrar</button></div>
+        <div style="flex:0"><button class="b sec" id="csv" type="button">Exportar CSV</button></div>
+      </div>
+      <p class="muted" id="resumo"></p>
+      <div class="tbl"><table><thead><tr><th>Nº</th><th>Data</th><th>Origem</th><th>Nível</th><th>Título / empresa</th><th>Sinais</th></tr></thead><tbody id="hist"></tbody></table></div>
+      <p class="muted" id="hist-local"></p>
+    </div>
+  </section>
+
+  <section role="tabpanel" id="p-rev" aria-labelledby="t-rev" hidden>
+    <div class="card" id="rev-empty"><p class="muted">Escolha uma análise no Histórico (clique no número) para revisar os campos extraídos.</p></div>
+    <div class="cols" id="rev" hidden>
+      <div class="card">
+        <h2>Corrigir extração <span class="pill" id="rev-id"></span></h2>
+        <p class="muted">Corrija o que a leitura da imagem errou. A análise é refeita com as mesmas regras e a correção fica registrada.</p>
+        <label for="r-title">Título</label><input id="r-title" type="text" maxlength="300">
+        <div class="row"><div><label for="r-company">Empresa</label><input id="r-company" type="text" maxlength="200"></div><div><label for="r-location">Local</label><input id="r-location" type="text" maxlength="200"></div><div><label for="r-salary">Salário</label><input id="r-salary" type="text" maxlength="200"></div></div>
+        <label for="r-desc">Texto do anúncio (transcrição)</label><textarea id="r-desc" maxlength="8000" style="min-height:220px"></textarea>
+        <button class="b" id="go-rev" type="button">Salvar e reanalisar</button>
+        <div class="out" id="out-rev" role="status"></div>
+      </div>
+      <div class="card"><h2>Antes e depois</h2><div id="rev-cmp"></div><h2 style="margin-top:14px">O que a imagem tinha</h2><div id="rev-ex"></div></div>
+    </div>
+  </section>
+
+  <section role="tabpanel" id="p-cfg" aria-labelledby="t-cfg" hidden>
+    <div class="card">
+      <h2>API ELO (leitura de imagens e gestão)</h2>
+      <p class="muted">Rode localmente com <code>npm run api</code> (porta 8787) ou use o endereço do ngrok.</p>
+      <label for="api">Endereço da API</label><input id="api" type="url" placeholder="http://localhost:8787">
+      <label for="admin">Chave de administrador (ELO_ADMIN_KEY do .env) — necessária para Histórico e Revisar</label><input id="admin" type="password" autocomplete="off">
+      <label style="font-weight:500"><input id="auto" type="checkbox"> Enviar imagens de posts com cara de vaga automaticamente para a API (desligado: só quando você clica em "Verificar imagem")</label>
+      <button class="b" id="save-api" type="button">Salvar e testar API</button>
+      <div class="out muted" id="out-api" role="status"></div>
+    </div>
+    <div class="card">
+      <h2>Supabase (opcional)</h2>
+      <p class="muted">Use a <b>URL do projeto</b> e a chave <b>anon/publishable</b>. <b>Nunca</b> cole a service role aqui.</p>
+      <label for="url">URL do projeto</label><input id="url" type="url" placeholder="https://xxxx.supabase.co">
+      <label for="key">Chave anon / publishable</label><input id="key" type="text" placeholder="sb_publishable_… ou eyJ…">
+      <button class="b" id="save" type="button">Salvar e testar conexão</button>
+      <div id="out" class="out muted" role="status"></div>
+    </div>
+  </section>
+</main>
+<script src="lib/rules.js"></script>
+<script src="painel.js"></script>
+</body></html>

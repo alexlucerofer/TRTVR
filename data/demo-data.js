@@ -14,6 +14,7 @@ const companies = [
   { key: 'mekong', name: 'Mekong Digital Marketing (fictícia)', domain: null, country: 'KH', registry_id: null, verification_status: 'nao_verificada', source: 'Dado fictício de demonstração ELO', domain_created_on: null, is_demo: true },
   { key: 'pacificbridge', name: 'Pacific Bridge Staffing (fictícia)', domain: null, country: 'TH', registry_id: null, verification_status: 'nao_verificada', source: 'Dado fictício de demonstração ELO', domain_created_on: null, is_demo: true },
   { key: 'iberia', name: 'Hostelería Costa Brava S.L. (fictícia)', domain: 'costabrava-hosteleria.example', country: 'ES', registry_id: null, verification_status: 'demonstracao', source: 'Dado fictício de demonstração ELO', domain_created_on: '2014-06-11', is_demo: true },
+  { key: 'lotus', name: 'Lotus Digital Solutions (fictícia)', domain: 'lotus-careers.example', country: 'TH', registry_id: null, verification_status: 'nao_verificada', source: 'Dado fictício de demonstração ELO', domain_created_on: '2026-10-28', is_demo: true },
   { key: 'recomeco1', name: 'Rede Parceira Recomeço — Logística Aurora (fictícia)', domain: 'logistica-aurora.example', country: 'BR', registry_id: null, verification_status: 'demonstracao', source: 'Parceira fictícia', domain_created_on: '2009-01-15', is_demo: true },
   { key: 'recomeco2', name: 'Instituto Tecer Futuro (fictício)', domain: 'tecerfuturo.example', country: 'BR', registry_id: null, verification_status: 'demonstracao', source: 'Parceira fictícia', domain_created_on: '2018-05-02', is_demo: true }
 ];
@@ -49,7 +50,12 @@ const demoJobs = [
     url: 'https://elo-demo.local/vagas/customer-service-bangkok' },
   { key: 'v10', company: 'iberia', company_name: 'Hostelería Costa Brava S.L. (fictícia)', title: 'Camarero/a de sala — temporada de verano', location: 'Girona, España', salary: '1.400 € brutos al mes',
     description: 'Ofrecemos contrato de trabajo de temporada (mayo a octubre) con alta en la seguridad social y alojamiento compartido sin coste. Gestionamos el visado de trabajo con el consulado; tus documentos quedan siempre contigo. Jornada de 40 horas semanales con dos días de descanso. Requisitos: experiencia mínima de 1 año en restauración. El proceso de selección es gratuito, con entrevista por videollamada. Envía tu currículum a empleo@costabrava-hosteleria.example.',
-    url: 'https://elo-demo.local/vagas/camarero-espana' }
+    url: 'https://elo-demo.local/vagas/camarero-espana' },
+  // v11: o golpe está quase todo na IMAGEM (panfleto). Pelo texto, "dados insuficientes"; lendo a imagem (API ELO), "alto risco".
+  { key: 'v11', company: 'lotus', company_name: 'Lotus Digital Solutions (fictícia)', title: 'Customer Support / Marketing Digital — Bangkok', location: 'Bangkok, Tailândia', salary: null,
+    description: 'Oportunidade internacional para brasileiros! Benefícios competitivos e processo rápido. Todos os detalhes estão no panfleto da vaga.',
+    flyer: 'scam-bangkok',
+    url: 'https://elo-demo.local/vagas/customer-support-bangkok' }
 ];
 // padrões reais em que cada anúncio fictício se baseia (mostrado na página da vaga)
 const patterns = {
@@ -62,6 +68,7 @@ const patterns = {
   v7: 'Padrão de aliciamento para exploração sexual (OIT/UNODC): mulheres jovens, fotos de corpo, viagem paga e descontada, pedido de sigilo à família.',
   v9: 'Anúncio em INGLÊS para falantes de português (padrão citado pela ONU/ACNUDH 2023 e PF 2026): atendimento em Bangkok, taxa de visto, passagem descontada, passaporte por Telegram.',
   v10: 'Anúncio em ESPANHOL consistente: contrato de temporada, seguridade social, visto de trabalho, documentos com o trabalhador, seleção gratuita.',
+  v11: 'Padrão de scam center (Itamaraty 2026, ONU/ACNUDH 2023, FBI): o texto não diz quase nada e as condições ficam num PANFLETO: salário em dólar, sem experiência, teste de digitação, 18–35 anos, visto de turista, transfer até a fronteira (Mae Sot), Telegram e sigilo. Use "Analisar imagem" do ELO.',
   v8: 'Padrão de centros de golpes no Camboja (ONU/ACNUDH 2023): "marketing digital", retenção de documentos e celular, jornada exaustiva, contato só por Telegram.'
 };
 demoJobs.forEach((j) => { j.slug = j.url.split('/').pop(); j.pattern = patterns[j.key]; });
@@ -112,5 +119,19 @@ const feedPosts = [
   { author: 'Empreiteiro (perfil fictício)', text: 'Preciso de 15 homens pra trabalhar em fazenda no Mato Grosso, levamos de ônibus, alojamento na fazenda. Passagem e comida descontadas no pagamento, trabalho de domingo a domingo. Salário R$ 180 por dia. Chama no zap.' }
 ];
 
-const data = { companies, demoJobs, seenJobs, employerRegistry, opportunities, supportResources, feedPosts };
+// Panfletos (imagens PNG geradas por scripts/build-flyers.js). O texto existe SÓ na imagem das páginas;
+// aqui fica a fonte para gerar o PNG e para os testes compararem o que a leitura da imagem deve encontrar.
+const flyers = [
+  { key: 'scam-bangkok', theme: 'asia', lang: 'pt', title: 'TRABALHE NA TAILÂNDIA', company: 'LOTUS DIGITAL SOLUTIONS', role: 'Customer Support / Marketing Digital',
+    lines: ['💵 Salário US$ 1.800 + comissão + bônus', '✅ Não precisa experiência — treinamento do zero', '✅ Inglês básico e saber usar computador', '✅ Teste de digitação: 30 palavras por minuto', '✅ Idade entre 18 e 35 anos', '✈️ Passagem aérea, hotel e alimentação grátis', '🛂 Entrada com visto de turista, nós providenciamos', '🚐 Em Bangkok, transfer de carro até o escritório parceiro na fronteira (Mae Sot)', '⏰ Embarque em 7 dias. Vagas limitadas!'],
+    contact: '📲 Envie foto do passaporte no Telegram @lotus_rh_br', footer: 'Não comente com a família até o contrato sair.' },
+  { key: 'typing-sihanoukville', theme: 'asia2', lang: 'en', title: 'URGENT HIRING — CAMBODIA', company: 'GOLDEN LOTUS CAREERS', role: 'Typing Job / Chat Support (Portuguese & English)',
+    lines: ['💵 Salary USD 1,500 + high commission', '✅ No experience needed', '✅ Typing speed 25 wpm', '✅ Age 18 to 30', '✈️ Free flight ticket, free accommodation and food', '🛂 Tourist visa provided by the company', '📍 Special Economic Zone, Sihanoukville', '⏰ Limited slots, apply today!'],
+    contact: '📲 Contact on Telegram only: @hr_goldenlotus_kh', footer: 'Immediate departure.' },
+  { key: 'clt-campinas', theme: 'office', lang: 'pt', title: 'ESTAMOS CONTRATANDO', company: 'LOGÍSTICA AURORA (fictícia)', role: 'Auxiliar de Logística — Campinas/SP',
+    lines: ['📄 Contrato CLT, carteira assinada', '💵 R$ 2.300 + vale-transporte + vale-refeição', '🕗 Jornada de 44h semanais, seg a sex', '✅ Ensino fundamental completo', '🏢 Entrevista presencial no nosso CD'],
+    contact: '🌐 Inscrições: logistica-aurora.example/vagas', footer: 'Processo seletivo sem nenhuma taxa.' }
+].map((f) => ({ ...f, text: [f.title, f.company, f.role, ...f.lines, f.contact, f.footer].join('\n') }));
+
+const data = { flyers, companies, demoJobs, seenJobs, employerRegistry, opportunities, supportResources, feedPosts };
 if (typeof module !== 'undefined') module.exports = data;

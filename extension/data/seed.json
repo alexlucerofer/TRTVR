@@ -1,6 +1,6 @@
 {
  "generated_from": "data/demo-data.js",
- "rules_version": "2026.11.07-1",
+ "rules_version": "2026.11.07-2",
  "companies": [
   {
    "key": "horizonte",
@@ -110,6 +110,17 @@
    "verification_status": "demonstracao",
    "source": "Dado fictício de demonstração ELO",
    "domain_created_on": "2014-06-11",
+   "is_demo": true
+  },
+  {
+   "key": "lotus",
+   "name": "Lotus Digital Solutions (fictícia)",
+   "domain": "lotus-careers.example",
+   "country": "TH",
+   "registry_id": null,
+   "verification_status": "nao_verificada",
+   "source": "Dado fictício de demonstração ELO",
+   "domain_created_on": "2026-10-28",
    "is_demo": true
   },
   {

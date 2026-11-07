@@ -5,6 +5,7 @@
  *  3. Resultados do Google                            → análise PRELIMINAR (título + resumo)
  *  4. Posts de feed ([role=article]: Facebook etc.)   → lê o texto visível de cada post
  *  5. Página genérica com cara de vaga (h1 + texto)   → análise completa
+ * Imagens: botão "Verificar imagem" ao passar o mouse (posts e páginas de vaga) → API ELO (Claude Vision/Tesseract).
  */
 (() => {
   if (window.__ELO_LOADED__) return; window.__ELO_LOADED__ = true;
@@ -12,7 +13,11 @@
   const HOST = location.hostname.replace(/^www\./, '');
   const IS_GOOGLE = /(^|\.)google\.[a-z.]+$/.test(HOST) && location.pathname.startsWith('/search');
   const IS_SERP = () => IS_GOOGLE || !!document.querySelector('[data-elo-serp]'); // buscador real ou simulado
-  const IS_SOCIAL = /(^|\.)(facebook|instagram|linkedin|x|twitter|threads)\.(com|net)$/.test(HOST);
+  // redes reais pelo host; redes simuladas da demo (Mural/RedePro) pelo atributo data-elo-social (funciona em localhost e ngrok)
+  const IS_SOCIAL = () => /(^|\.)(facebook|instagram|linkedin|x|twitter|threads)\.(com|net)$/.test(HOST) || !!document.body?.hasAttribute('data-elo-social');
+  const POST_SEL = '[aria-posinset], [role="feed"] > div, [data-pagelet^="FeedUnit"], [data-urn*="activity"], [data-testid="tweet"], [role="article"], [data-elo-post]';
+  let jobPage = false; // página de vaga detectada (JSON-LD/genérica) — habilita o botão de imagem fora de posts
+  let autoImage = false; // painel: "enviar imagens de posts automaticamente"
   const done = new WeakMap(); // elemento -> hash do texto analisado
   let paused = false;
  
@@ -69,7 +74,7 @@
     const out = [];
     // Facebook atual: posts do feed = [aria-posinset] ou filhos de [role=feed]; comentários = [role=article] aninhados.
     // LinkedIn: [data-urn*="activity"]; X/Twitter: [data-testid=tweet]; demo e outros: [role=article].
-    const SEL = '[aria-posinset], [role="feed"] > div, [data-pagelet^="FeedUnit"], [data-urn*="activity"], [data-testid="tweet"], [role="article"], [data-elo-post]';
+    const SEL = POST_SEL;
     const posts = [...document.querySelectorAll(SEL)].filter((p) => !(p.parentElement && p.parentElement.closest(SEL))); // só o bloco mais externo
     for (const p of posts) {
       // o texto de vagas costuma estar DENTRO da imagem; o Facebook descreve esse texto no "alt" das imagens
@@ -87,11 +92,27 @@
       const lines = t.split('\n').map((l) => l.trim()).filter(Boolean);
       // não envia nome de quem postou: título = primeira linha com cara de vaga
       const title = (lines.find((l) => R.isJobLike(l + ' vaga salario')) || lines[0] || 'Post com oferta de trabalho').slice(0, 140);
-      out.push({ el: p, job: { title, company: null, company_url, description: t.slice(0, 7000), url, source: 'facebook', preliminary: t.length < 120 } });
+      out.push({ el: p, image: adImage(p), job: { title, company: null, company_url, description: t.slice(0, 7000), url, source: 'facebook', preliminary: t.length < 120 } });
     }
     return out;
   }
  
+  // maior imagem "de anúncio" dentro de um bloco (ignora avatares e ícones)
+  function bigEnough(img) {
+    const r = img.getBoundingClientRect();
+    const w = r.width || img.width || +img.getAttribute('width') || 0, h = r.height || img.height || +img.getAttribute('height') || 0;
+    return w >= 160 && h >= 120 && !!(img.currentSrc || img.src);
+  }
+  function adImage(root) {
+    let best = null, area = 0;
+    for (const img of root.querySelectorAll('img')) {
+      if (!bigEnough(img)) continue;
+      const r = img.getBoundingClientRect(), a = (r.width || img.width) * (r.height || img.height);
+      if (a > area) { best = img; area = a; }
+    }
+    return best;
+  }
+
   function genericPage() {
     const h1 = document.querySelector('h1');
     const main = document.querySelector('main, [role="main"], article') || document.body;
@@ -148,6 +169,9 @@
     // Social: só mostra selo quando há algo a dizer (não polui o feed)
     if (job.source === 'facebook' && r.result.level === 'sem_alertas') b.host.style.display = 'none';
     if (inline) renderInline(job, r.result);
+    // envio automático (opcional, desligado por padrão): post com imagem e sem alto risco no texto
+    const img = el.__eloImage;
+    if (autoImage && img && r.result.level !== 'alto_risco') runImage(img, { auto: true });
   }
  
   // ------------------------------------------------------------------ componentes visuais (abas, ícones, cartões)
@@ -227,6 +251,9 @@
     .okbox{display:flex;gap:10px;align-items:flex-start;background:#ecfdf3;color:#067647;border-radius:12px;padding:12px}
     .okbox div{color:#101828}
     ul.plain{margin:0;padding-left:18px} ul.plain li{margin:0 0 6px}
+    .pbox{display:flex;gap:10px;align-items:flex-start;background:#eff8ff;color:#175cd3;border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:13px} .pbox div{color:#101828}
+    dl.ex{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;margin:4px 0;font-size:13px} dl.ex dt{color:#667085} dl.ex dd{margin:0;overflow-wrap:anywhere}
+    details.raw summary{cursor:pointer;font-size:13px;color:#175cd3;margin-top:6px} details.raw pre{white-space:pre-wrap;font-size:12px;background:#f9fafb;border-radius:8px;padding:8px;max-height:220px;overflow:auto}
   `;
 
   // abas acessíveis dentro de um shadow root
@@ -252,12 +279,29 @@
     });
   }
 
+  // notas do perfil (área de interesse e região, do Painel) — nunca mudam o nível
+  const profileBox = (res) => (res.profile_notes || []).length ? `<div class="pbox">${icon('help', 18)}<div>${res.profile_notes.map((n) => `<div>${esc(n)}</div>`).join('')}</div></div>` : '';
+  // o que a API leu da imagem
+  function imageSection(res) {
+    const ex = res.image_extraction; if (!ex) return '';
+    const f = ex.campos || {}, c = f.contatos || {}, v = f.viagem || {};
+    const rows = [['Empresa', f.empresa], ['Cargo', f.titulo], ['Local', [f.local, f.pais].filter(Boolean).join(', ')], ['Salário', f.salario],
+      ['Contatos', [].concat(c.telegram || [], c.whatsapp || [], c.telefones || [], c.emails || [], c.sites || []).join(' · ')],
+      ['Visto', v.visto], ['Rota', v.rota], ['Passagem', v.passagem && v.passagem !== 'nao_informado' ? v.passagem.replace(/_/g, ' ') : ''],
+      ['Observações', f.observacoes_visuais]].filter((r) => r[1]);
+    const who = ex.engine === 'claude' ? 'Claude Vision' + (ex.model ? ' (' + ex.model + ')' : '') : 'OCR local (Tesseract)';
+    return `<div class="sec">${icon('search', 16)}Lido da imagem · ${esc(who)}</div>
+      ${rows.length ? `<dl class="ex">${rows.map((r) => `<dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd>`).join('')}</dl>` : ''}
+      ${(ex.avisos || []).map((w) => `<p class="note">${esc(w)}</p>`).join('')}
+      <details class="raw"><summary>Texto transcrito da imagem</summary><pre>${esc(f.texto_completo || '')}</pre></details>`;
+  }
+
   // aba "Alerta": aviso principal em destaque + demais sinais com ícone
   function alertTab(res, { full = false, basis = null } = {}) {
     const L = LEVEL[res.level];
     const list = sortBySeverity(res.indicators);
     if (!list.length) {
-      return `<div class="okbox">${icon('ok', 22)}<div><b>Nenhum sinal de risco no texto${res.preliminary ? ' disponível' : ''}.</b><br>Mesmo assim, confirme a empresa e nunca pague para se candidatar.</div></div>`;
+      return `${profileBox(res)}<div class="okbox">${icon('ok', 22)}<div><b>Nenhum sinal de risco no texto${res.preliminary ? ' disponível' : ''}.</b><br>Mesmo assim, confirme a empresa e nunca pague para se candidatar.</div></div>`;
     }
     const [main, ...rest] = list;
     const S = sev(main.severity);
@@ -267,7 +311,7 @@
       ${(full ? a.evidence : a.evidence.slice(0, 1)).map((e) => `<q class="quote" style="color:${s.color}"><span style="color:#344054">${esc(e)}</span></q>`).join('')}
       ${full && basis ? `<div class="basis">Fundamento: ${basis(a.basis)}</div>` : ''}</div></div>`; };
     const why = full ? '' : `<div class="sec">${icon('alert', 16)}Por que parece ${res.level === 'alto_risco' ? 'falsa ou perigosa' : 'suspeita'}</div>`;
-    return `${why}<div class="hero" style="background:${L.bg};border-color:${L.color}33">
+    return `${profileBox(res)}${why}<div class="hero" style="background:${L.bg};border-color:${L.color}33">
         <div class="hi" style="background:${S.color}">${icon(main.id, 24)}</div>
         <div style="flex:1;min-width:0"><div class="kicker" style="color:${S.color}">Alerta principal · ${S.label}</div>
           <div class="t">${esc(main.title)}</div>
@@ -324,7 +368,7 @@
       .tr{background:#f9fafb;border-radius:8px;padding:10px;margin-top:10px;white-space:pre-wrap} .lang{font-size:12px;color:#475467;margin-top:2px}
     </style>
     <div class="box" role="region" aria-label="Análise ELO desta vaga">
-      <div class="head"><div class="ic">${L.icon}</div><div><b>ELO: ${L.label}${res.preliminary ? ' (preliminar)' : ''}</b><div>${esc(res.justification)}</div>${res.lang && res.lang !== 'pt' ? `<div class="lang">Anúncio em ${esc(res.lang_name)} — analisado com as regras nesse idioma.</div>` : ''}</div></div>
+      <div class="head"><div class="ic">${L.icon}</div><div><b>ELO: ${L.label}${res.preliminary ? ' (preliminar)' : ''}</b>${res.image_extraction ? '<div class="lang" style="font-weight:700;color:' + L.color + '">Inclui o texto lido da imagem do anúncio.</div>' : ''}<div>${esc(res.justification)}</div>${res.lang && res.lang !== 'pt' ? `<div class="lang">Anúncio em ${esc(res.lang_name)} — analisado com as regras nesse idioma.</div>` : ''}</div></div>
       <div class="body">
         ${tabsHTML('elo-in', [
           { label: 'Alerta', icon: 'alert', count: res.indicators.length, html: alertTab(res) },
@@ -352,13 +396,124 @@
     if (found) return;
     if (IS_SERP()) { for (const g of googleResults()) process(g.el, g.job, 'after', g.anchor); return; }
     const posts = feedPosts();
-    for (const p of posts) process(p.el, p.job, 'prepend');
-    if (IS_SOCIAL && posts.length) return;
+    for (const p of posts) { p.el.__eloImage = p.image; process(p.el, p.job, 'prepend'); }
+    if (IS_SOCIAL() && posts.length) return;
     const ld = fromJsonLd();
-    if (ld.length) { const h1 = document.querySelector('h1') || document.body.firstElementChild; process(h1, ld[0], 'after', null, true); return; }
-    if (!posts.length) { const g = genericPage(); if (g) process(g.el, g.job, 'after', null, true); }
+    if (ld.length) { jobPage = true; const h1 = document.querySelector('h1') || document.body.firstElementChild; process(h1, ld[0], 'after', null, true); return; }
+    if (!posts.length) { const g = genericPage(); if (g) { jobPage = true; process(g.el, g.job, 'after', null, true); } }
   }
  
+  // ------------------------------------------------------------------ botão "Verificar imagem" (aparece ao passar o mouse)
+  // Fica no canto inferior esquerdo da imagem, em posts (Mural/RedePro/Facebook/LinkedIn) e em páginas de vaga.
+  let hover = null; // { host, btn, img, hideT }
+  function imageEligible(img) {
+    if (!img || img.tagName !== 'IMG' || !bigEnough(img)) return false;
+    if (img.closest('elo-badge, elo-panel, elo-inline, elo-imgbtn')) return false;
+    return !!img.closest(POST_SEL) || IS_SOCIAL() || jobPage || img.hasAttribute('data-elo-flyer');
+  }
+  function ensureHover() {
+    if (hover) return hover;
+    const host = document.createElement('elo-imgbtn');
+    host.style.cssText = 'all:initial;position:fixed;z-index:2147483600;display:none;';
+    const sh = host.attachShadow({ mode: 'open' });
+    sh.innerHTML = `<style>
+      button{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;padding:9px 14px 9px 10px;border-radius:999px;
+        font:700 13.5px/1 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#fff;background:linear-gradient(135deg,#f04438,#f79009);
+        box-shadow:0 6px 18px rgba(240,68,56,.45),0 0 0 3px rgba(255,255,255,.9);animation:pulse 1.6s ease-in-out infinite;white-space:nowrap}
+      button:hover{filter:brightness(1.06)} button:focus-visible{outline:3px solid #175cd3;outline-offset:2px}
+      .ic{width:22px;height:22px;border-radius:50%;background:#fff;color:#f04438;display:grid;place-items:center;font-size:13px}
+      button.busy{animation:none;background:#475467;box-shadow:0 6px 18px rgba(16,24,40,.35),0 0 0 3px rgba(255,255,255,.9)}
+      button.err{animation:none;background:#b42318}
+      @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+      @media (prefers-reduced-motion: reduce){button{animation:none}}
+    </style><button type="button" aria-label="Verificar esta imagem com o ELO"><span class="ic">🔍</span><span class="t">ELO · Verificar imagem</span></button>`;
+    const btn = sh.querySelector('button');
+    document.documentElement.appendChild(host);
+    hover = { host, btn, label: sh.querySelector('.t'), img: null, hideT: null };
+    host.addEventListener('mouseenter', () => clearTimeout(hover.hideT));
+    host.addEventListener('mouseleave', () => scheduleHide());
+    btn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); if (hover.img) runImage(hover.img); });
+    window.addEventListener('scroll', () => { if (hover.img && hover.host.style.display !== 'none') place(hover.img); }, { passive: true });
+    return hover;
+  }
+  // depois da leitura, o botão mostra o resultado na cor do nível
+  function paintHover(result) {
+    const h = ensureHover();
+    h.btn.className = ''; h.btn.style.background = ''; h.btn.style.animation = '';
+    if (!result) { h.label.textContent = 'ELO · Verificar imagem'; return; }
+    const L = LEVEL[result.level];
+    h.label.textContent = 'ELO: ' + L.label + (result.indicators.length ? ' · ' + result.indicators.length + ' sinal(is)' : '') + ' · ver análise';
+    h.btn.style.background = L.color; h.btn.style.animation = result.level === 'alto_risco' ? '' : 'none';
+  }
+  function place(img) {
+    const r = img.getBoundingClientRect(), h = ensureHover();
+    if (r.bottom < 0 || r.top > innerHeight) { h.host.style.display = 'none'; return; }
+    h.host.style.display = 'block';
+    h.host.style.left = Math.max(8, r.left + 12) + 'px';
+    h.host.style.top = Math.min(innerHeight - 52, Math.max(8, r.bottom - 52)) + 'px';
+  }
+  function scheduleHide() { const h = ensureHover(); clearTimeout(h.hideT); h.hideT = setTimeout(() => { if (!h.btn.classList.contains('busy')) h.host.style.display = 'none'; }, 350); }
+  document.addEventListener('mouseover', (e) => {
+    if (paused) return;
+    const img = e.target && e.target.closest ? e.target.closest('img') : null;
+    if (!imageEligible(img)) return;
+    const h = ensureHover(); clearTimeout(h.hideT);
+    if (h.img !== img && !h.btn.classList.contains('busy')) { h.img = img; paintHover(img.__eloImageResult); }
+    place(img);
+  }, true);
+  document.addEventListener('mouseout', (e) => { if (hover && e.target === hover.img) scheduleHide(); }, true);
+
+  // contexto do post (legenda) e endereço, sem nome de quem postou
+  function imageContext(img) {
+    const post = img.closest(POST_SEL) || img.closest('[data-elo-job]');
+    const root = post || img.closest('article, main') || document.body;
+    const caption = txt(root).slice(0, 1500);
+    const link = post && post.querySelector('a[href*="/posts/"], a[href*="/permalink/"], a[href*="story_fbid"], a[data-elo-permalink]');
+    return { post, caption, url: link ? link.href.split('?')[0] : location.href };
+  }
+  async function runImage(img, { auto = false } = {}) {
+    const ctx = imageContext(img);
+    if (img.__eloImageResult) return showImageResult(img, ctx, img.__eloImageResult);
+    const h = ensureHover(); const mine = h.img === img;
+    if (mine) { h.btn.className = 'busy'; h.label.textContent = 'ELO lendo a imagem…'; }
+    const r = await send({ type: 'analyzeImage', src: img.currentSrc || img.src, caption: ctx.caption, url: ctx.url });
+    if (!r.ok) {
+      if (mine && !auto) { h.btn.className = 'err'; h.label.textContent = 'ELO: ' + String(r.error || 'erro').slice(0, 70); setTimeout(() => { h.btn.className = ''; h.label.textContent = 'ELO · Verificar imagem'; }, 5000); }
+      return;
+    }
+    r.result.image_src = img.currentSrc || img.src;
+    img.__eloImageResult = r.result;
+    if (mine) paintHover(r.result);
+    if (!auto) showImageResult(img, ctx, r.result);
+    else if (ctx.post && ctx.post.__eloBadge) { ctx.post.__eloBadge.paint(r.result); ctx.post.__eloBadge.host.style.display = ''; }
+  }
+  function showImageResult(img, ctx, result) {
+    const job = { ...(result.image_job || {}), title: (result.image_job && result.image_job.title) || 'Anúncio em imagem', url: ctx.url };
+    // repinta o selo do post com o resultado da imagem (texto + imagem)
+    const b = ctx.post && ctx.post.__eloBadge;
+    if (b) { b.paint(result); b.host.style.display = ''; }
+    else if (jobPage && document.querySelector('elo-inline')) renderInline(job, result);
+    openPanel(job, result);
+  }
+  // toasts (menu de contexto "Verificar esta imagem com o ELO")
+  function toast(text, color = '#101828') {
+    document.querySelector('elo-toast')?.remove();
+    const t = document.createElement('elo-toast');
+    t.style.cssText = `all:initial;position:fixed;left:16px;bottom:16px;z-index:2147483647;background:${color};color:#fff;font:600 14px system-ui,sans-serif;padding:12px 16px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:min(520px,calc(100vw - 32px))`;
+    t.textContent = text; document.documentElement.appendChild(t);
+    return t;
+  }
+  chrome.runtime.onMessage.addListener((m) => {
+    if (m.type === 'imageProgress') toast('ELO lendo a imagem…');
+    if (m.type === 'imageError') { const t = toast('ELO: ' + m.error, '#b42318'); setTimeout(() => t.remove(), 7000); }
+    if (m.type === 'imageResult') {
+      document.querySelector('elo-toast')?.remove();
+      const img = [...document.images].find((i) => (i.currentSrc || i.src) === m.src);
+      if (img) { m.result.image_src = m.src; img.__eloImageResult = m.result; }
+      showImageResult(img || document.body, img ? imageContext(img) : { post: null, url: location.href }, m.result);
+    }
+  });
+
   // ------------------------------------------------------------------ painel
   let panelHost = null;
   function openPanel(job, res) {
@@ -374,9 +529,12 @@
     const nJobs = jobsCount(res);
     const source = res.mode === 'supabase'
       ? `Consultado e registrado no Supabase · análise <code>${esc(String(res.analysis_id).slice(0, 8))}</code> · ${new Date(res.stored_at).toLocaleString('pt-BR')}`
-      : `Modo local — ${esc(res.mode_reason || '')}. Mesmas regras, dados de demonstração.`;
+      : res.mode === 'api'
+        ? `Imagem lida pela API ELO · análise nº ${esc(res.api_analysis_id)} (aparece no Painel → Histórico). A imagem não é guardada.`
+        : `Modo local — ${esc(res.mode_reason || '')}. Mesmas regras, dados de demonstração.`;
     const help = helpChannels(res);
     const alertHTML = `${alertTab(res, { full: true, basis })}
+      ${imageSection(res)}
       <div class="sec">${icon('ok', 16)}Informações verificadas</div>
       ${list(res.verified, (v) => `<li><b>${esc(v.item)}:</b> ${esc(v.value)} <span class="basis">— ${esc(v.source)}</span></li>`, 'Nada pôde ser verificado em fonte externa.')}
       <div class="sec">${icon('_default', 16)}Informações insuficientes</div>
@@ -394,10 +552,15 @@
       form{display:grid;gap:8px} select,textarea{font:inherit;padding:8px;border:1px solid #d0d5dd;border-radius:8px;width:100%} textarea{min-height:80px}
       .send{background:#101828;color:#fff;border:0;border-radius:8px;padding:10px;font:600 14px system-ui;cursor:pointer}
       .src{font-size:12px;color:#667085;border-top:1px solid #eaecf0;margin-top:20px;padding-top:10px} code{font-size:12px}
+      .imgbar{display:flex;gap:12px;align-items:center;border:2px solid;border-radius:12px;padding:10px;margin:14px 0 0}
+      .imgbar img{width:64px;height:84px;object-fit:cover;border-radius:8px;flex:none;background:#f2f4f7}
+      .imgbar .kick{font:800 11px/1.2 system-ui,sans-serif;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+      .imgbar b{display:block;font-size:15px} .imgbar small{display:block;color:#475467;font-size:12.5px;margin-top:2px}
     </style>
     <div class="back"></div>
     <aside role="dialog" aria-label="Análise ELO">
       <header><div><h2>${esc(job.title)}</h2><div class="muted">${esc(job.company || 'Empresa não informada')}${job.location ? ' · ' + esc(job.location) : ''}</div></div><button class="close" type="button">Fechar</button></header>
+      ${res.image_extraction ? `<div class="imgbar" style="border-color:${L.color}">${res.image_src && /^(https?:|data:image)/.test(res.image_src) ? `<img src="${esc(res.image_src)}" alt="Imagem analisada">` : ''}<div><div class="kick" style="color:${L.color}">Aviso lido da IMAGEM do anúncio</div><b>${esc(LEVEL[res.level].label)} · ${res.indicators.length} sinal(is)</b><small>${esc(res.image_extraction.engine === 'claude' ? 'Lido por Claude Vision' : res.image_extraction.engine === 'tesseract' ? 'Lido por OCR local (Tesseract)' : 'Leitura de demonstração')} · o texto do golpe estava na imagem, não no post</small></div></div>` : ''}
       <div class="lvl" style="background:${L.bg}"><div class="ic" style="background:${L.color}">${L.icon}</div><div><b style="color:${L.color}">${L.label}${res.preliminary ? ' — análise preliminar' : ''}</b><div>${esc(res.justification)}</div></div></div>
 
       ${tabsHTML('elo-pn', [
@@ -431,12 +594,13 @@
   // ------------------------------------------------------------------ ciclo
   let timer = null;
   const schedule = () => { clearTimeout(timer); timer = setTimeout(scan, 700); };
-  chrome.storage.local.get('pausedHosts').then(({ pausedHosts = [] }) => {
+  chrome.storage.local.get(['pausedHosts', 'autoImage']).then(({ pausedHosts = [], autoImage: ai = false }) => {
     paused = pausedHosts.includes(HOST);
+    autoImage = !!ai;
     if (paused) return;
     scan();
     new MutationObserver((muts) => {
-      if (muts.every((m) => [...m.addedNodes].every((n) => n.nodeName === 'ELO-BADGE' || n.nodeName === 'ELO-PANEL'))) return;
+      if (muts.every((m) => [...m.addedNodes].every((n) => /^ELO-/.test(n.nodeName)))) return;
       schedule();
     }).observe(document.body, { childList: true, subtree: true, characterData: true });
   });

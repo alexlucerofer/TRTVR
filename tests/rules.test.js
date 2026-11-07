@@ -4,8 +4,27 @@ const R = require('../shared/rules.js'), Core = require('../shared/analyze_core.
 const D = require('../data/demo-data.js');
 const an = (j, f) => R.analyze({ title: j.title, company: j.company_name, description: j.description, location: j.location, salary: j.salary, url: j.url }, f);
 
-test('10 vagas de demonstração: 4 consistentes (2 no exterior), 1 insuficiente, 5 de risco', () => {
-  assert.deepStrictEqual(D.demoJobs.map((j) => an(j).level), ['sem_alertas', 'sem_alertas', 'dados_insuficientes', 'alto_risco', 'alto_risco', 'sem_alertas', 'alto_risco', 'alto_risco', 'alto_risco', 'sem_alertas']);
+test('11 vagas de demonstração: 4 consistentes (2 no exterior), 2 insuficientes (v11 só tem o golpe na imagem), 5 de risco', () => {
+  assert.deepStrictEqual(D.demoJobs.map((j) => an(j).level), ['sem_alertas', 'sem_alertas', 'dados_insuficientes', 'alto_risco', 'alto_risco', 'sem_alertas', 'alto_risco', 'alto_risco', 'alto_risco', 'sem_alertas', 'dados_insuficientes']);
+});
+test('panfletos: texto lido da imagem dispara o padrão de scam center; o cartaz CLT não', () => {
+  const lvl = (k) => R.analyze({ title: 'panfleto', description: D.flyers.find((f) => f.key === k).text });
+  for (const k of ['scam-bangkok', 'typing-sihanoukville']) {
+    const a = lvl(k); assert.strictEqual(a.level, 'alto_risco', k);
+    const sea = a.indicators.find((i) => i.id === 'PADRAO_SUDESTE_ASIATICO'); assert.ok(sea, k);
+    assert.ok(/visto de TURISTA/.test(sea.evidence.join(' ')), k + ': visto de turista');
+  }
+  assert.ok(/transferência por terra/.test(lvl('scam-bangkok').indicators.find((i) => i.id === 'PADRAO_SUDESTE_ASIATICO').evidence.join(' ')));
+  assert.strictEqual(lvl('clt-campinas').level, 'sem_alertas');
+});
+test('perfil gera nota (nunca alerta) e não muda o nível', () => {
+  const j = { title: 'panfleto', description: D.flyers[0].text };
+  const sem = R.analyze(j), com = R.analyze(j, { profile: { areas: ['atendimento'], regioes: ['sudeste_asiatico'], origem_uf: 'SP' } });
+  assert.strictEqual(sem.level, com.level); assert.strictEqual(sem.score, com.score);
+  assert.deepStrictEqual(sem.profile_notes, []);
+  assert.ok(com.profile_notes.some((n) => /MAIS procurado/.test(n)));
+  assert.ok(com.profile_notes.some((n) => /Sudeste Asiático/.test(n)));
+  assert.deepStrictEqual(Core.sanitizeProfile({ areas: ['ti', '<script>'], regioes: ['europa', 'x'], origem_uf: 'rj1' }), { areas: ['ti'], regioes: ['europa'], origem_uf: null });
 });
 test('país sozinho não gera alerta', () => {
   const a = R.analyze({ title: 'Engenheiro de software', company: 'Empresa X', description: 'Vaga em Bangkok, Tailândia. Contrato de trabalho e visto de trabalho providenciados pela empresa. Salário compatível. Entrevistas em 3 etapas pelo site da empresa.', url: 'https://x.test/1' });

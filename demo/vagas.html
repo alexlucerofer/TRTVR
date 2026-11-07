@@ -8,7 +8,7 @@ h1{font-size:24px;line-height:1.25;margin:0 0 6px} h2{font-size:18px;margin:0 0 
 .btn{display:inline-block;background:#111827;color:#fff;border:0;border-radius:8px;padding:10px 16px;font:600 15px system-ui;cursor:pointer;text-decoration:none}
 .av{display:inline-grid;place-items:center;border-radius:50%;color:#fff;font-weight:700;flex:none}
 svg{display:block;width:100%;height:auto;border-radius:10px} dialog{border:0;border-radius:12px;max-width:480px;padding:20px} dialog::backdrop{background:rgba(17,24,39,.45)}
-.pattern{font-size:13px;color:var(--muted);border-top:1px solid var(--line);margin-top:16px;padding-top:10px}
+img.flyer{display:block;width:100%;height:auto;border-radius:10px} .pattern{font-size:13px;color:var(--muted);border-top:1px solid var(--line);margin-top:16px;padding-top:10px}
 /* buscador */
 .sbar{display:flex;gap:8px;flex:1;max-width:560px} .sbar input{flex:1;padding:10px 16px;border:1px solid #d1d5db;border-radius:999px;font:inherit;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .tabs{display:flex;gap:18px;max-width:720px;margin:0 auto;padding:8px 16px 0;font-size:14px} .tabs button{border:0;background:none;padding:8px 2px;font:inherit;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent} .tabs button[aria-pressed=true]{color:var(--accent);border-color:var(--accent);font-weight:600}
@@ -22,7 +22,7 @@ svg{display:block;width:100%;height:auto;border-radius:10px} dialog{border:0;bor
 .compose{display:flex;gap:10px;align-items:center} .compose span.ph{flex:1;background:#f3f4f6;border-radius:999px;padding:10px 14px;color:var(--muted)}
 /* página da vaga */
 .job-head{display:flex;gap:12px;align-items:center;margin:14px 0} .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:12px 0} .facts div{background:#f9fafb;border-radius:8px;padding:8px 10px;font-size:13.5px} .facts b{display:block;font-size:12px;color:var(--muted);font-weight:500}</style></head><body>
-<div class="top"><a class="brand" href="vagas.html">VagasJá</a><span class="meta">portal de vagas fictício</span><nav><a href="index.html">Início</a><a href="busca.html">Procura</a><a href="feed.html">Conecta</a><a href="vagas.html">VagasJá</a></nav></div><div class="warn">Simulação para demonstrar o ELO. Marcas, empresas e vagas são FICTÍCIAS; os textos seguem padrões reais documentados (OIT, ONU, Itamaraty, Polícia Federal). Links de notícias, portais e canais oficiais são REAIS.</div>
+<div class="top"><a class="brand" href="vagas.html">VagasJá</a><span class="meta">portal de vagas fictício</span><nav><a href="index.html">Início</a><a href="busca.html">Procura</a><a href="feed.html">Conecta</a><a href="social/mural.html">Mural</a><a href="social/redepro.html">RedePro</a><a href="vagas.html">VagasJá</a></nav></div><div class="warn">Simulação para demonstrar o ELO. Marcas, empresas e vagas são FICTÍCIAS; os textos seguem padrões reais documentados (OIT, ONU, Itamaraty, Polícia Federal). Links de notícias, portais e canais oficiais são REAIS.</div>
 <main><article class="card" data-elo-job data-elo-url="https://elo-demo.local/vagas/analista-atendimento">
   <div style="display:flex;gap:12px"><span class="av" style="width:44px;height:44px;background:#ea580c;font-size:17.6px">HS</span><div style="flex:1">
   <h2 data-elo-title><a href="vaga/analista-atendimento.html">Analista de Atendimento ao Cliente</a></h2>
@@ -82,4 +82,10 @@ svg{display:block;width:100%;height:auto;border-radius:10px} dialog{border:0;bor
   <h2 data-elo-title><a href="vaga/camarero-espana.html">Camarero/a de sala — temporada de verano</a></h2>
   <div class="meta"><span data-elo-company>Hostelería Costa Brava S.L. (fictícia)</span> · <span data-elo-location>Girona, España</span> · <span data-elo-salary>1.400 € brutos al mes</span></div>
   <p data-elo-description>Ofrecemos contrato de trabajo de temporada (mayo a octubre) con alta en la seguridad social y alojamiento compartido sin coste. Gestionamos el visado de trabajo con el consulado; tus documentos quedan siempre contigo. Jornada de 40 horas semanales con dos días de descanso. Requisitos: experiencia mínima de 1 año en restauración. El proceso de selección es gratuito, con entrevista por videollamada. Envía tu currículum a empleo@costabrava-hosteleria.example.</p></div></div>
+</article>
+<article class="card" data-elo-job data-elo-url="https://elo-demo.local/vagas/customer-support-bangkok">
+  <div style="display:flex;gap:12px"><span class="av" style="width:44px;height:44px;background:#7c3aed;font-size:17.6px">LD</span><div style="flex:1">
+  <h2 data-elo-title><a href="vaga/customer-support-bangkok.html">Customer Support / Marketing Digital — Bangkok</a></h2>
+  <div class="meta"><span data-elo-company>Lotus Digital Solutions (fictícia)</span> · <span data-elo-location>Bangkok, Tailândia</span></div>
+  <p data-elo-description>Oportunidade internacional para brasileiros! Benefícios competitivos e processo rápido. Todos os detalhes estão no panfleto da vaga.</p><a href="vaga/customer-support-bangkok.html" style="display:block;max-width:260px"><img class="flyer" src="img/scam-bangkok.png" width="720" height="960" alt="Pode ser uma imagem de texto" loading="eager" data-elo-flyer></a></div></div>
 </article></main></body></html>

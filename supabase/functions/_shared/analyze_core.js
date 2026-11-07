@@ -14,7 +14,7 @@
     const job = {
       title: clip(j.title, 300), company: clip(j.company, 200), description: clip(j.description, 8000),
       location: clip(j.location, 200), salary: clip(j.salary, 200), url: clip(j.url, 2000),
-      source: ['pagina', 'jsonld', 'google', 'facebook', 'demo', 'selecao', 'feed'].includes(j.source) ? j.source : 'pagina',
+      source: ['pagina', 'jsonld', 'google', 'facebook', 'demo', 'selecao', 'feed', 'imagem'].includes(j.source) ? j.source : 'pagina',
       preliminary: !!j.preliminary, company_url: clip(j.company_url, 300)
     };
     if (!job.title || job.title.length < 2) throw new Error('título inválido');
@@ -87,6 +87,7 @@
       .map((r) => ({ company: r.company_name, url: r.url, seen_at: r.first_seen_at, similarity: R.similarity(text, [r.title, r.description].join(' ')) }))
       .filter((s) => s.similarity >= 0.6).sort((a, b) => b.similarity - a.similarity).slice(0, 5);
     if (input.local_history) facts.local_history = input.local_history;
+    if (input.profile && typeof input.profile === 'object') facts.profile = sanitizeProfile(input.profile);
 
     // 4) regras
     const a = R.analyze(job, facts);
@@ -102,14 +103,22 @@
 
     // 6) alternativas e canais de apoio
     const opps = await deps.db.listOpportunities();
-    const alternatives = a.level === 'sem_alertas' ? [] : R.rankAlternatives(job, opps, 3);
+    const alternatives = a.level === 'sem_alertas' ? [] : R.rankAlternatives(job, opps, 3, facts.profile);
     // ordem: país de destino → internacional → Brasil (para vaga no Brasil: Brasil primeiro)
-    const dest = /tailandia|thailand|bangkok/.test(R.norm(text + ' ' + (job.location || ''))) ? 'TH' : null;
+    const dest = /tailandia|thailand|bangkok|mae sot|camboja|cambodia|mianmar|myanmar|laos/.test(R.norm(text + ' ' + (job.location || ''))) ? 'TH' : null;
     const countries = dest ? [dest, 'INT', 'BR'] : ['BR', 'INT'];
     const support = (await deps.db.listSupport()).filter((s) => countries.includes(s.country))
       .sort((a, b) => countries.indexOf(a.country) - countries.indexOf(b.country));
 
     return { ...a, job_id: saved.job_id, analysis_id: saved.analysis_id, stored_at: saved.created_at, facts_used: Object.keys(facts), alternatives, support, legal: R.LEGAL };
+  }
+
+  // perfil vindo do painel: só listas curtas de códigos conhecidos (nada de texto livre)
+  function sanitizeProfile(p) {
+    const A = ['atendimento', 'ti', 'marketing_digital', 'agro', 'construcao', 'hotelaria', 'domestico', 'beleza_entretenimento', 'outra'];
+    const RG = ['brasil', 'america_do_sul', 'europa', 'america_do_norte', 'oriente_medio', 'sudeste_asiatico', 'asia_leste'];
+    const uf = typeof p.origem_uf === 'string' && /^[A-Za-z]{2}$/.test(p.origem_uf) ? p.origem_uf.toUpperCase() : null;
+    return { areas: (Array.isArray(p.areas) ? p.areas : []).filter((a) => A.includes(a)).slice(0, 9), regioes: (Array.isArray(p.regioes) ? p.regioes : []).filter((r) => RG.includes(r)).slice(0, 7), origem_uf: uf };
   }
 
   function validateReport(b) {
@@ -147,7 +156,7 @@
     };
   }
 
-  const api = { runAnalysis, validateJob, validateReport, companyDomain, memoryDb };
+  const api = { runAnalysis, sanitizeProfile, validateJob, validateReport, companyDomain, memoryDb };
   root.ELOCore = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

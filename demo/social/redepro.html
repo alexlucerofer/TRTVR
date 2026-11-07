@@ -1,0 +1,66 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RedePro — rede profissional (fictícia)</title><style>:root{--bg:#f3f4f6;--card:#fff;--ink:#111827;--muted:#6b7280;--line:#e5e7eb;--accent:#1a56db}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+a{color:var(--accent)} .top{background:#fff;border-bottom:1px solid var(--line);padding:10px 16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:5}
+.brand{font-weight:800;font-size:20px;letter-spacing:-.02em;text-decoration:none;color:var(--ink)} .top nav{margin-left:auto;display:flex;gap:14px;font-size:14px}
+.warn{background:#fffbeb;color:#92400e;padding:7px 16px;font-size:12.5px;border-bottom:1px solid #fde68a}
+main{max-width:720px;margin:18px auto;padding:0 16px} .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+h1{font-size:24px;line-height:1.25;margin:0 0 6px} h2{font-size:18px;margin:0 0 4px} .meta{color:var(--muted);font-size:13.5px}
+.btn{display:inline-block;background:#111827;color:#fff;border:0;border-radius:8px;padding:10px 16px;font:600 15px system-ui;cursor:pointer;text-decoration:none}
+.av{display:inline-grid;place-items:center;border-radius:50%;color:#fff;font-weight:700;flex:none}
+svg{display:block;width:100%;height:auto;border-radius:10px} dialog{border:0;border-radius:12px;max-width:480px;padding:20px} dialog::backdrop{background:rgba(17,24,39,.45)}
+img.flyer{display:block;width:100%;height:auto;border-radius:10px} .pattern{font-size:13px;color:var(--muted);border-top:1px solid var(--line);margin-top:16px;padding-top:10px}
+/* buscador */
+.sbar{display:flex;gap:8px;flex:1;max-width:560px} .sbar input{flex:1;padding:10px 16px;border:1px solid #d1d5db;border-radius:999px;font:inherit;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.tabs{display:flex;gap:18px;max-width:720px;margin:0 auto;padding:8px 16px 0;font-size:14px} .tabs button{border:0;background:none;padding:8px 2px;font:inherit;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent} .tabs button[aria-pressed=true]{color:var(--accent);border-color:var(--accent);font-weight:600}
+.count{max-width:720px;margin:6px auto 0;padding:0 16px;font-size:13px;color:var(--muted)}
+.result{margin:0 0 26px} .site{display:flex;gap:10px;align-items:center;font-size:13px} .site b{display:block;font-weight:500;color:var(--ink)} .result h3{font-size:19px;font-weight:500;margin:4px 0 2px;color:var(--accent)} .result a{text-decoration:none} .result a:hover h3{text-decoration:underline}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0} .chip{font-size:12px;background:#eef2ff;color:#3730a3;border-radius:999px;padding:2px 8px}
+/* rede social */
+.post{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:14px;overflow:hidden} .post .ph{display:flex;gap:10px;align-items:center;padding:12px 14px 6px} .post .ph b{display:block;font-size:15px} .post .tx{padding:4px 14px 10px;white-space:pre-line}
+.post svg{border-radius:0} .post .ft{display:flex;justify-content:space-between;padding:8px 14px;font-size:13px;color:var(--muted);border-top:1px solid var(--line)} .post .lk{display:block;padding:10px 14px;font-weight:600;text-decoration:none}
+.preview{display:block;margin:0 14px 12px;border:1px solid var(--line);border-radius:10px;overflow:hidden;text-decoration:none;color:var(--ink)} .preview div{padding:10px 12px} .preview small{color:var(--muted);text-transform:uppercase;font-size:11px}
+.compose{display:flex;gap:10px;align-items:center} .compose span.ph{flex:1;background:#f3f4f6;border-radius:999px;padding:10px 14px;color:var(--muted)}
+/* página da vaga */
+.job-head{display:flex;gap:12px;align-items:center;margin:14px 0} .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:12px 0} .facts div{background:#f9fafb;border-radius:8px;padding:8px 10px;font-size:13.5px} .facts b{display:block;font-size:12px;color:var(--muted);font-weight:500}body{background:#f3f2ef} .top{background:#fff} .top .brand{color:#0f766e} .layout{max-width:1040px;margin:18px auto;padding:0 16px;display:grid;grid-template-columns:230px minmax(0,1fr) 260px;gap:16px}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)} .side{display:none}}
+.feed-shared{background:#fff;border:1px solid var(--line);border-radius:10px;margin-bottom:12px;overflow:hidden}
+.actor{display:flex;gap:10px;padding:12px 14px 4px} .actor b{display:block} .actor .meta{font-size:12.5px}
+.commentary{padding:6px 14px 10px;white-space:pre-line} .feed-shared img.flyer{border-radius:0}
+.job-card{display:block;margin:0 14px 12px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;text-decoration:none;color:var(--ink)} .job-card small{color:var(--muted)}
+.social-counts{padding:8px 14px;font-size:12.5px;color:var(--muted);border-top:1px solid var(--line)}
+.top-card h1{font-size:24px} .pill{display:inline-block;background:#e7f3ef;color:#0f5132;border-radius:999px;padding:2px 10px;font-size:12.5px;margin-right:6px}
+.btn.pro{background:#0f766e;border-radius:999px} .recruiter{display:flex;gap:10px;align-items:center}</style></head><body data-elo-social="redepro">
+<div class="top"><a class="brand" href="redepro.html">▣ RedePro</a><span class="meta">rede profissional fictícia</span><nav><a href="../index.html">Início</a><a href="../busca.html">Procura</a><a href="../feed.html">Conecta</a><a href="../social/mural.html">Mural</a><a href="../social/redepro.html">RedePro</a><a href="../vagas.html">VagasJá</a></nav></div><div class="warn">Simulação para demonstrar o ELO. Marcas, empresas e vagas são FICTÍCIAS; os textos seguem padrões reais documentados (OIT, ONU, Itamaraty, Polícia Federal). Links de notícias, portais e canais oficiais são REAIS.</div>
+<div class="layout"><aside class="side"><div class="card"><span class="av" style="width:56px;height:56px;background:#ca8a04;font-size:22.400000000000002px">VU</span><p><b>Você Usuário</b></p><p class="meta">Procurando oportunidades</p></div></aside>
+  <main style="margin:0;padding:0;max-width:none"><div class="feed-shared" data-urn="urn:li:activity:7391200000000000001">
+  <div class="actor"><span class="av" style="width:44px;height:44px;background:#db2777;font-size:17.6px">AL</span><div><b>Ana Lima (perfil fictício)</b><span class="meta">Talent Acquisition | Lotus Digital Solutions · perfil criado há 2 semanas · 3 conexões<br>6 h · 🌐</span></div></div>
+  <div class="commentary">#hiring 🚀 Oportunidade internacional para brasileiros!
+Customer Support em Bangkok. Todos os detalhes no flyer.
+Interessados, comentem &quot;EU QUERO&quot; que eu chamo no privado. 🙌</div>
+  <img class="flyer" src="../img/scam-bangkok.png" width="720" height="960" alt="Pode ser uma imagem de texto" loading="eager" data-elo-flyer>
+  <a class="job-card" href="redepro-vaga.html"><b>Customer Support / Marketing Digital — Bangkok</b><br><small>Lotus Digital Solutions (fictícia) · Bangkok, Tailândia</small></a>
+  <a data-elo-permalink href="#feed/update/urn:li:activity:7391200000000000001" style="display:none">post</a>
+  <div class="social-counts">312 reações · 198 comentários · Gostei · Comentar · Compartilhar</div></div>
+<div class="feed-shared" data-urn="urn:li:activity:7391200000000000002">
+  <div class="actor"><span class="av" style="width:44px;height:44px;background:#ea580c;font-size:17.6px">CM</span><div><b>Carlos Menezes (perfil fictício)</b><span class="meta">Coordenador de Logística na Logística Aurora (fictícia)<br>1 d · 🌐</span></div></div>
+  <div class="commentary">Estamos contratando auxiliares de logística em Campinas/SP, CLT, R$ 2.300 + benefícios, 44h semanais. Inscrições pelo site logistica-aurora.example/vagas. Processo seletivo gratuito, sem nenhuma taxa.</div>
+  
+  
+  <a data-elo-permalink href="#feed/update/urn:li:activity:7391200000000000002" style="display:none">post</a>
+  <div class="social-counts">88 reações · 12 comentários · Gostei · Comentar · Compartilhar</div></div>
+<div class="feed-shared" data-urn="urn:li:activity:7391200000000000003">
+  <div class="actor"><span class="av" style="width:44px;height:44px;background:#7c3aed;font-size:17.6px">PG</span><div><b>Patrícia Gomes (perfil fictício)</b><span class="meta">Analista de Dados<br>2 d · 🌐</span></div></div>
+  <div class="commentary">Feliz em compartilhar que comecei em um novo cargo como Analista de Dados! 🎉</div>
+  
+  
+  <a data-elo-permalink href="#feed/update/urn:li:activity:7391200000000000003" style="display:none">post</a>
+  <div class="social-counts">540 reações · 96 comentários · Gostei · Comentar · Compartilhar</div></div>
+<div class="feed-shared" data-urn="urn:li:activity:7391200000000000004">
+  <div class="actor"><span class="av" style="width:44px;height:44px;background:#ca8a04;font-size:17.6px">HA</span><div><b>Hotel Atlântico Lda (fictício)</b><span class="meta">Hotelaria · Porto, Portugal<br>3 d · 🌐</span></div></div>
+  <div class="commentary">Vagas de cozinheiro(a) no Porto. Contrato de trabalho escrito enviado antes da viagem e apoio ao visto de trabalho. € 1.150 por mês. Seleção sem taxas, entrevista por vídeo.</div>
+  
+  <a class="job-card" href="../vaga/cozinheiro-portugal.html"><b>Cozinheiro(a) em Portugal — contrato e visto de trabalho</b><br><small>Hotel Atlântico Lda (fictício) · Porto, Portugal</small></a>
+  <a data-elo-permalink href="#feed/update/urn:li:activity:7391200000000000004" style="display:none">post</a>
+  <div class="social-counts">205 reações · 31 comentários · Gostei · Comentar · Compartilhar</div></div></main>
+  <aside class="side"><div class="card"><b>Vagas recomendadas</b><p class="sp"><a href="redepro-vaga.html">Customer Support / Marketing Digital — Bangkok</a><br>Lotus Digital Solutions (fictícia)</p></div></aside>
+</div></body></html>

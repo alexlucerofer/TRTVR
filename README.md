@@ -18,9 +18,13 @@ data/demo-data.js          dados iniciais (fictícios marcados + canais de apoio
 supabase/migrations/       esquema + RLS
 supabase/seed.sql          GERADO por scripts/build-seed.js
 supabase/functions/        analyze, report, moderate (Deno)
-extension/                 extensão Chrome MV3 (carregar esta pasta)
-demo/vagas.html            portal de vagas fictício (5 vagas)
+extension/                 extensão Chrome MV3 (carregar esta pasta); painel.html = perfil, imagens, histórico, revisão
+api/                       API ELO em Python (FastAPI): leitura de imagens + verificação pública + gestão
+api/bridge/elo_bridge.js   ponte Node: a API usa as MESMAS regras de shared/ (sem reescrever em Python)
+demo/vagas.html            portal de vagas fictício (11 vagas; a v11 tem o golpe só no panfleto)
 demo/feed.html             feed social fictício (posts role="article", carrega mais ao rolar)
+demo/social/               Mural (estilo feed com grupos) e RedePro (rede profissional), com panfletos
+demo/img/                  panfletos PNG (scripts/build-flyers.js) + flyers.json (índice SHA-256)
 tests/                     testes unitários e E2E
 docs/                      referências, dados para a plataforma
 ```
@@ -61,7 +65,9 @@ A resposta deve ter `"mode":"supabase"` e um `analysis_id`. A linha aparece em `
 
 1. Chrome → `chrome://extensions` → ligue **Modo do desenvolvedor**.
 2. **Carregar sem compactação** → escolha a pasta `extension/`.
-3. Clique no ícone do ELO → **Configurar Supabase** → cole a URL e a chave **anon/publishable** → **Salvar e testar conexão**. O teste lê o banco e grava uma análise de teste.
+3. Clique no ícone do ELO → **Abrir painel**:
+   - **Meu perfil**: área de interesse e região (opcional). Gera avisos personalizados, nunca muda o nível de risco.
+   - **Configurações**: endereço da API ELO (`http://localhost:8787` ou o do ngrok), chave de administrador e, opcionalmente, Supabase (URL + chave **anon/publishable**).
 
 Sem configuração, a extensão funciona em **modo local**: mesmas regras, dados de demonstração, nada gravado. O painel sempre diz em qual modo está.
 
@@ -118,20 +124,66 @@ Câmbio de referência fixo, só para ordem de grandeza do salário: USD 5,5; EU
 - Moderação: crie um usuário em Authentication, rode `insert into admins(user_id) values ('<uuid>')` e use a função `moderate` com o token desse usuário. Também dá para moderar direto no Table Editor.
 - Relatos **não** são enviados a autoridades. O painel diz isso e aponta os canais oficiais.
 
+## 5. API ELO — imagens, verificação pública e gestão
+
+Anúncios de scam center chegam muitas vezes como **panfleto em imagem**, com quase nada em texto. A API lê a imagem e passa o texto pelas mesmas regras da extensão.
+
+```bash
+cp .env.example .env        # defina ELO_ADMIN_KEY e, para leitura com IA, ANTHROPIC_API_KEY
+npm run api:setup           # cria api/.venv e instala as dependências
+npm run api                 # http://localhost:8787  (documentação em /docs)
+```
+
+Leitura da imagem, nesta ordem:
+1. **Claude Vision** (`ANTHROPIC_API_KEY`; modelo em `ELO_VISION_MODEL`, padrão `claude-opus-5-5`): transcreve o texto e extrai empresa, salário, contatos, visto e rota.
+2. **Tesseract** (OCR local, grátis): `sudo apt install tesseract-ocr tesseract-ocr-por`.
+3. **Demonstração**: sem os dois, os panfletos de `demo/img/` são reconhecidos pelo SHA-256, então a demo funciona offline.
+
+| Rota | Acesso | Para quê |
+|---|---|---|
+| `POST /v1/analisar/texto` | público, com limite por IP | texto de uma vaga → nível, sinais, trechos, fundamentos |
+| `POST /v1/analisar/imagem` (multipart) e `/imagem/base64` | público | imagem (+ legenda) → campos extraídos + análise |
+| `GET /v1/indicadores` | público | regras, severidade e base legal |
+| `POST /v1/alertas/inscricao` | público | formulário de alertas da landing page (tudo opcional, só exige consentimento) |
+| `GET /` | público | página "Verificar uma vaga" para qualquer pessoa |
+| `/v1/gestao/*` | header `X-Elo-Admin-Key` | histórico, detalhe, correção (`PATCH`), CSV, inscrições |
+
+**Privacidade:** a imagem não é guardada (só o SHA-256, os campos e o resultado). Na inscrição, a localização é arredondada para cerca de 100 m e o telefone é opcional.
+
+**Na extensão:** passe o mouse sobre a imagem de um post ou de uma vaga. Aparece o botão **"ELO · Verificar imagem"** no canto inferior esquerdo. Também dá para clicar com o botão direito → **Verificar esta imagem com o ELO**, ou usar o Painel → **Analisar imagem**. O resultado repinta o selo do post e abre o painel com "Aviso lido da IMAGEM do anúncio".
+
+## 6. Versão online (ngrok)
+
+A API serve tudo no mesmo endereço: `/demo/` (vagas fake, Mural, RedePro), `/lp/` (landing page) e a própria API.
+
+```bash
+npm run api
+ngrok http 8787
+```
+
+- Abra `https://SEU-ENDERECO.ngrok-free.app/demo/social/mural.html` e `/demo/social/redepro.html`.
+- No Painel da extensão → Configurações, use `https://SEU-ENDERECO.ngrok-free.app` como endereço da API.
+- A landing page em `/lp/` envia as inscrições para a mesma API automaticamente.
+- O GitHub Pages também publica a demo em `/demo` (sem a API: a leitura de imagens usa o endereço configurado no Painel).
+- Com o ngrok, `/v1/gestao/*` fica na internet: use uma `ELO_ADMIN_KEY` longa.
+
 ## Landing page
 
-`site/index.html` é a página pública de divulgação (sem build). O workflow `.github/workflows/pages.yml` publica a pasta no GitHub Pages a cada push em `site/`: https://alexlucerofer.github.io/TRTVR/ (em Settings → Pages, escolha **Source: GitHub Actions**).
+`site/index.html` é a página pública de divulgação (sem build). O workflow `.github/workflows/pages.yml` publica a pasta (e a demo em `/demo`) no GitHub Pages a cada push em `site/` ou `demo/`: https://alexlucerofer.github.io/TRTVR/ (em Settings → Pages, escolha **Source: GitHub Actions**).
 
 - O QR code aponta para a própria página (endereço onde ela estiver publicada). O botão "Baixar QR (PNG)" gera a versão para cartaz.
 - O botão de download aponta para o zip do último release: `npm run zip && gh release create vX.Y.Z elo-extensao.zip`.
-- Para ver localmente: `python3 -m http.server 8090 --directory site`.
+- Para ver localmente: `python3 -m http.server 8090 --directory site`, ou `npm run api` e abrir http://localhost:8787/lp/.
+- **Alertas por região** (`#alertas`): botão "Usar minha localização" (o navegador pede permissão), áreas e regiões de interesse, telefone/WhatsApp e e-mail opcionais. Idioma e fuso horário vêm do navegador. A página mostra a prévia exata do que será enviado e só envia com o consentimento marcado. A resposta traz a região estimada e os canais de ajuda dela. Fora da API, o servidor é definido por `?api=https://...` ou pelo campo "Servidor da API".
 
 ## Desenvolvimento
 
 ```bash
 npm run build      # regenera seed.sql, seed.json, demo/*.html e copia rules.js/analyze_core.js
+npm run flyers     # regenera os panfletos PNG (Chrome headless) e demo/img/flyers.json
 npm test           # testes unitários das regras
-npm run test:e2e   # Chromium + extensão nas páginas de demo (requer Playwright)
+npm run test:api   # testes da API (pytest)
+npm run test:e2e   # Chromium + extensão + API real: demo, Mural, RedePro, painel e LP (npm i; npm run api:setup)
 npm run zip        # gera elo-extensao.zip
 ```
 
