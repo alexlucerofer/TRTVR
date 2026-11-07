@@ -5,7 +5,7 @@
 // Usado por scripts/build-demo.js.
 const fs = require('fs'), path = require('path');
 
-module.exports = function buildSocial({ root, D, byKey, NEWS, esc, flyerImg }) {
+module.exports = function buildSocial({ root, D, byKey, NEWS, esc, flyerImg, switcher, SWITCH_CSS }) {
   const v11 = byKey.v11;
   const out = path.join(root, 'social');
   fs.mkdirSync(out, { recursive: true });
@@ -64,14 +64,15 @@ module.exports = function buildSocial({ root, D, byKey, NEWS, esc, flyerImg }) {
   };
   const REACT = (kinds) => `<span class="rx">${kinds.map((k, i) => `<span class="re" style="z-index:${3 - i};background:${RX[k][0]}"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">${RX[k][1]}</svg></span>`).join('')}</span>`;
   // aviso de simulação: discreto, mas sempre visível (rodapé fixo)
-  const SIM = (back) => `<div class="sim" role="note"><b>Simulação ELO</b> · rede, empresas e vagas FICTÍCIAS, com padrões reais documentados (OIT, ONU, Itamaraty, PF). <a href="${back}">Voltar à demonstração</a></div>`;
+  const SIM = (back, current) => `<div class="sim" role="note"><b>Simulação ELO</b> · rede, empresas e vagas FICTÍCIAS, com padrões reais documentados (OIT, ONU, Itamaraty, PF).${switcher('../', current, true)}</div>`;
   const doc = (title, css, body, attr) => `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><style>${css}</style></head><body data-elo-social="${attr}">${body}</body></html>`;
 
-  const BASE_CSS = `*{box-sizing:border-box} html{-webkit-text-size-adjust:100%} body{margin:0;font:15px/1.34 "Segoe UI Historic","Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;padding-bottom:40px}
+  const BASE_CSS0 = `*{box-sizing:border-box} html{-webkit-text-size-adjust:100%} body{margin:0;font:15px/1.34 "Segoe UI Historic","Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;padding-bottom:40px}
 a{color:inherit;text-decoration:none} button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
 .av{display:inline-grid;place-items:center;border-radius:50%;color:#fff;font-weight:700;flex:none;letter-spacing:.02em} .av.sq{border-radius:6px}
 .i{display:block;flex:none} img.flyer{display:block;width:100%;height:auto;border-radius:0}
-.sim{position:fixed;left:0;right:0;bottom:0;z-index:50;background:#111827;color:#e5e7eb;font-size:12px;padding:7px 14px;text-align:center} .sim a{color:#93c5fd;text-decoration:underline} .sim b{color:#fff}
+.sim{position:fixed;left:0;right:0;bottom:0;z-index:50;background:#111827;color:#e5e7eb;font-size:12px;padding:7px 14px;text-align:center} .sim a{color:#93c5fd;text-decoration:underline} .sim b{color:#fff} .sim{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:4px}`;
+  const BASE_CSS = BASE_CSS0 + SWITCH_CSS + `
 .rx{display:inline-flex;vertical-align:middle} .re{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;font-size:11px;margin-left:-4px;border:2px solid #fff;position:relative;background:#fff} .re:first-child{margin-left:0}`;
 
   // ================================================================ MURAL (rede social: feed, grupos, stories)
@@ -181,7 +182,7 @@ body{background:var(--m-bg);color:var(--m-ink)}
     ${['Ana Paula', 'Diego Lima', 'Marina Costa', 'Bruno Alves', 'Camila Duarte', 'Tia Célia'].map((n) => `<a class="contact" href="#"><span class="wrap">${av(n, 36)}<span class="on"></span></span>${esc(n)}</a>`).join('')}
   </aside>
 </div>
-${SIM('../index.html')}`;
+${SIM('../index.html', 'social/mural.html')}`;
   fs.writeFileSync(path.join(out, 'mural.html'), doc('Mural', M_CSS, mural, 'mural'));
 
   // ================================================================ REDEPRO (rede profissional: feed e vagas)
@@ -290,7 +291,7 @@ dialog{border:0;border-radius:8px;max-width:480px;padding:20px} dialog::backdrop
   </main>
   <aside class="right">${newsCard}</aside>
 </div>
-${SIM('../index.html')}`;
+${SIM('../index.html', 'social/redepro.html')}`;
   fs.writeFileSync(path.join(out, 'redepro.html'), doc('Feed | RedePro', P_CSS, redepro, 'redepro'));
 
   // ---------------- página da vaga (lista à esquerda, detalhe à direita, como os portais profissionais)
@@ -328,6 +329,6 @@ ${SIM('../index.html')}`;
 </div>
 <dialog id="apply"><p>Simulação: neste padrão, a "candidatura simplificada" leva a uma conversa no Telegram que pede foto do passaporte e embarque rápido. Não envie documentos. Nenhum dado foi enviado.</p><form method="dialog"><button class="apply">Entendi</button></form></dialog>
 <script type="application/ld+json">${JSON.stringify(v11ld).replace(/</g, '\\u003c')}</script>
-${SIM('../index.html')}`;
+${SIM('../index.html', 'social/redepro-vaga.html')}`;
   fs.writeFileSync(path.join(out, 'redepro-vaga.html'), doc(v11.title + ' | Lotus Digital Solutions | RedePro', P_CSS, vaga, 'redepro'));
 };

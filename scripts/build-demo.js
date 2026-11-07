@@ -57,7 +57,20 @@ img.flyer{display:block;width:100%;height:auto;border-radius:10px} .pattern{font
 /* página da vaga */
 .job-head{display:flex;gap:12px;align-items:center;margin:14px 0} .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:12px 0} .facts div{background:#f9fafb;border-radius:8px;padding:8px 10px;font-size:13.5px} .facts b{display:block;font-size:12px;color:var(--muted);font-weight:500}`;
 const nav = (base) => `<nav><a href="${base}index.html">Início</a><a href="${base}busca.html">Procura</a><a href="${base}feed.html">Conecta</a><a href="${base}social/mural.html">Mural</a><a href="${base}social/redepro.html">RedePro</a><a href="${base}vagas.html">VagasJá</a></nav>`;
-const page = (title, body, base = '', extra = {}) => `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><style>${css}${extra.css || ''}</style></head><body${extra.bodyAttr || ''}>${body.replaceAll('{{NAV}}', nav(base))}</body></html>`;
+// menu suspenso para navegar entre as páginas da demo (fixo no canto; também usado nas redes do scripts/demo-social.js)
+const DEMO_PAGES = [
+  ['index.html', 'Início da demonstração'], ['social/mural.html', 'Mural — rede social'], ['social/redepro.html', 'RedePro — feed profissional'],
+  ['social/redepro-vaga.html', 'RedePro — vaga com panfleto'], ['vagas.html', 'VagasJá — portal de vagas'], ['vaga/customer-support-bangkok.html', 'VagasJá — vaga com panfleto'],
+  ['busca.html', 'Procura — buscador'], ['feed.html', 'Conecta — rede social simples'], ['@lp', 'Landing page do ELO']
+];
+const switcher = (base, current, inline = false) => `<label class="dswitch${inline ? ' inl' : ''}"><span>Ir para</span><select aria-label="Navegar entre as páginas da demonstração" onchange="if(this.value)location.href=this.value">${DEMO_PAGES.map(([href, label]) =>
+  `<option value="${href === '@lp' ? '' : base + href}"${href === current ? ' selected' : ''}${href === '@lp' ? ' data-lp' : ''}>${esc(label)}</option>`).join('')}</select></label>
+<script>(()=>{const o=document.querySelector('.dswitch option[data-lp]');if(o)o.value=location.pathname.includes('/TRTVR/')?location.pathname.split('/TRTVR/')[0]+'/TRTVR/':location.pathname.startsWith('/demo/')?'/lp/':'${base}../site/index.html';})();</script>`;
+const SWITCH_CSS = `.dswitch{position:fixed;right:16px;bottom:16px;z-index:60;display:flex;align-items:center;gap:8px;background:#111827;color:#fff;border-radius:999px;padding:6px 6px 6px 14px;font:600 13px system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.dswitch select{font:600 13px system-ui,sans-serif;border:0;border-radius:999px;padding:7px 10px;background:#fff;color:#111827;max-width:min(260px,60vw);cursor:pointer}
+.dswitch.inl{position:static;box-shadow:none;background:transparent;padding:0;display:inline-flex;margin-left:10px} .dswitch.inl select{padding:3px 8px}`;
+
+const page = (title, body, base = '', extra = {}) => `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><style>${css}${SWITCH_CSS}${extra.css || ''}</style></head><body${extra.bodyAttr || ''}>${body.replaceAll('{{NAV}}', nav(base))}${switcher(base, extra.current)}</body></html>`;
 const WARN = '<div class="warn">Simulação para demonstrar o ELO. Marcas, empresas e vagas são FICTÍCIAS; os textos seguem padrões reais documentados (OIT, ONU, Itamaraty, Polícia Federal). Links de notícias, portais e canais oficiais são REAIS.</div>';
 
 const levels = Object.fromEntries(D.demoJobs.map((j) => [j.key, R.analyze({ title: j.title, company: j.company_name, description: j.description, location: j.location, salary: j.salary, url: j.url }).level]));
@@ -96,7 +109,7 @@ for (const j of D.demoJobs) {
   <div class="pattern"><b>Sobre este exemplo:</b> ${esc(j.pattern)}</div>
 </article></main>
 <dialog id="apply"><p>${esc(applyMsg)}</p><form method="dialog"><button class="btn">Entendi</button></form></dialog>
-<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>`, '../'));
+<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>`, '../', { current: j.slug === 'customer-support-bangkok' ? 'vaga/customer-support-bangkok.html' : null }));
 }
 
 // ---------- portal (lista)
@@ -107,7 +120,7 @@ fs.writeFileSync(path.join(root, 'vagas.html'), page('VagasJá — portal de vag
   <h2 data-elo-title><a href="vaga/${j.slug}.html">${esc(j.title)}</a></h2>
   <div class="meta">${j.company_name ? `<span data-elo-company>${esc(j.company_name)}</span>` : 'Empresa não informada'}${j.location ? ` · <span data-elo-location>${esc(j.location)}</span>` : ''}${j.salary ? ` · <span data-elo-salary>${esc(j.salary)}</span>` : ''}</div>
   <p data-elo-description>${esc(j.description)}</p>${j.flyer ? `<a href="vaga/${j.slug}.html" style="display:block;max-width:260px">${flyerImg(j.flyer, '')}</a>` : ''}</div></div>
-</article>`).join('\n')}</main>`));
+</article>`).join('\n')}</main>`, '', { current: 'vagas.html' }));
 
 // ---------- buscador "Procura"
 const jobResults = D.demoJobs.map((j) => ({ kind: 'vaga', site: 'VagasJá', crumb: 'vagasja.simulado › vaga › ' + j.slug, title: j.title + (j.company_name ? ' — ' + j.company_name : ''), url: 'vaga/' + j.slug + '.html',
@@ -134,7 +147,7 @@ function filtrar(){ const q=norm(document.getElementById('q').value).split(/\\s+
   document.getElementById('count').textContent='Aproximadamente '+n+' resultados (simulação)'; }
 for(const b of document.querySelectorAll('.tabs button')) b.onclick=()=>{ kind=b.dataset.k; for(const x of document.querySelectorAll('.tabs button')) x.setAttribute('aria-pressed', String(x===b)); filtrar(); };
 filtrar();
-</script>`));
+</script>`, '', { current: 'busca.html' }));
 
 // ---------- rede social "Conecta"
 const byKey = Object.fromEntries(D.demoJobs.map((j) => [j.key, j]));
@@ -168,7 +181,7 @@ fs.writeFileSync(path.join(root, 'feed.html'), page('Conecta — rede social (fi
 // simula o "carregar mais" do feed: novos posts entram depois, como no scroll infinito
 const later = ${JSON.stringify(later.map((p, i) => postHtml(p, 100 + i)))};
 setTimeout(() => { for (const h of later) document.getElementById('feed').insertAdjacentHTML('beforeend', h); document.getElementById('loading').remove(); }, 1500);
-</script>`));
+</script>`, '', { current: 'feed.html' }));
 
 // ---------- início
 fs.writeFileSync(path.join(root, 'index.html'), page('ELO — demonstração', `
@@ -180,8 +193,8 @@ fs.writeFileSync(path.join(root, 'index.html'), page('ELO — demonstração', `
   <a class="card" style="display:block;text-decoration:none;color:inherit" href="social/mural.html"><h2 style="color:#0d9488">Mural — rede social com grupos</h2><p class="meta">Grupo "Brasileiros na Tailândia", post patrocinado e anúncio que é <b>só um panfleto</b>: o texto do golpe está na imagem. Use "Ler imagem" do ELO (API local).</p></a>
   <a class="card" style="display:block;text-decoration:none;color:inherit" href="social/redepro.html"><h2 style="color:#0f766e">RedePro — rede profissional</h2><p class="meta">Recrutador com perfil recém-criado, vaga de scam center com "candidatura simplificada" e panfleto anexado.</p></a>
   <a class="card" style="display:block;text-decoration:none;color:inherit" href="vagas.html"><h2>VagasJá — portal de vagas</h2><p class="meta">${D.demoJobs.length} vagas no Brasil e no exterior, em português, inglês e espanhol. Cada uma tem página própria com dados estruturados, como portais reais.</p></a>
-</main>`));
+</main>`, '', { current: 'index.html' }));
 // ================================================================ redes sociais fictícias (Mural e RedePro): scripts/demo-social.js
-require('./demo-social.js')({ root, D, byKey, NEWS, esc, flyerImg });
+require('./demo-social.js')({ root, D, byKey, NEWS, esc, flyerImg, switcher, SWITCH_CSS });
 
 console.log('ok: demo/ (' + D.demoJobs.length + ' vagas, Mural, RedePro)');
