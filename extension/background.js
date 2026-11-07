@@ -155,7 +155,12 @@ async function analyzeImage(msg) {
   if (profile) fd.append('perfil', JSON.stringify(profile));
   let r;
   try { r = await fetch(apiUrl + '/v1/analisar/imagem', { method: 'POST', body: fd, headers: { 'ngrok-skip-browser-warning': '1' } }); }
-  catch { throw new Error('API ELO fora do ar em ' + apiUrl + ' (rode "npm run api" ou ajuste no Painel)'); }
+  catch {
+    // sem API: os panfletos da demo ainda são reconhecidos aqui mesmo (flyers.json ao lado da imagem)
+    const offline = await demoFlyerOffline(blob, msg, profile).catch(() => null);
+    if (offline) { if (key) imageCache.set(key, { at: Date.now(), result: offline }); return offline; }
+    throw new Error('API ELO fora do ar em ' + apiUrl + '. Rode "npm run api" nesta máquina ou coloque o endereço do ngrok no Painel → Configurações.');
+  }
   const data = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(data.detail ? (typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail)) : 'HTTP ' + r.status);
   const result = { ...data.analise, image_extraction: data.extraido, image_job: data.job, image_sha256: data.imagem_sha256 };
@@ -163,6 +168,21 @@ async function analyzeImage(msg) {
   await remember(data.job, self.ELORules.extractContacts(data.job.description || '').phones);
   if (key) imageCache.set(key, { at: Date.now(), result });
   return result;
+}
+
+// Reserva sem servidor, só para as imagens da DEMO: compara o SHA-256 com demo/img/flyers.json
+// (publicado ao lado dos panfletos, inclusive no GitHub Pages) e roda as mesmas regras no modo local.
+async function demoFlyerOffline(blob, msg, profile) {
+  if (!msg.src || !/^https?:/.test(msg.src)) return null;
+  const sha = [...new Uint8Array(await crypto.subtle.digest('SHA-256', await blob.arrayBuffer()))].map((b) => b.toString(16).padStart(2, '0')).join('');
+  const idx = await (await fetch(new URL('flyers.json', msg.src), { headers: { 'ngrok-skip-browser-warning': '1' } })).json();
+  const f = Array.isArray(idx) && idx.find((x) => x.sha256 === sha);
+  if (!f) return null;
+  const job = { title: f.title || 'Anúncio em imagem', company: f.company ? f.company.replace(/\b\w/g, (c) => c.toUpperCase()).replace(/\B\w/g, (c) => c.toLowerCase()) : null,
+    description: f.text + (msg.caption ? '\nLegenda: ' + String(msg.caption).slice(0, 1500) : ''), url: /^https?:/.test(msg.url || '') ? msg.url : msg.src, source: 'imagem' };
+  const hist = await historySignals(job);
+  const r = await runLocal(job, hist, 'API ELO fora do ar: panfleto da demonstração lido na própria extensão', profile);
+  return { ...r, image_extraction: { engine: 'demo', model: null, campos: { texto_completo: f.text, titulo: f.title, empresa: job.company }, avisos: ['API ELO fora do ar: leitura de demonstração feita na própria extensão (só funciona com os panfletos da demo).'] }, image_job: job, image_sha256: sha };
 }
 
 // menu de contexto: clique direito em qualquer imagem

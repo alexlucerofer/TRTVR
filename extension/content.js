@@ -485,7 +485,7 @@
     if (mine) { h.btn.className = 'busy'; h.label.textContent = 'ELO lendo a imagem…'; }
     const r = await send({ type: 'analyzeImage', src: img.currentSrc || img.src, caption: ctx.caption, url: ctx.url });
     if (!r.ok) {
-      if (mine && !auto) { h.btn.className = 'err'; h.label.textContent = 'ELO: ' + String(r.error || 'erro').slice(0, 70); setTimeout(() => { h.btn.className = ''; h.label.textContent = 'ELO · Verificar imagem'; }, 5000); }
+      if (mine && !auto) { h.btn.className = 'err'; h.label.textContent = /fora do ar/.test(r.error || '') ? 'ELO: API fora do ar · veja o Painel' : 'ELO: ' + String(r.error || 'erro').slice(0, 70); h.btn.title = r.error || ''; setTimeout(() => { h.btn.className = ''; h.btn.title = ''; h.label.textContent = 'ELO · Verificar imagem'; }, 6000); }
       return;
     }
     r.result.image_src = img.currentSrc || img.src;

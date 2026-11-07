@@ -157,6 +157,8 @@ Leitura da imagem, nesta ordem:
 
 **Atualizar a extensão:** depois de baixar a versão nova (ou de um `git pull`), abra `chrome://extensions` e clique no ícone de recarregar (↻) no cartão do ELO. Em seguida, recarregue as abas que já estavam abertas. Se você instalou pelo zip, substitua o conteúdo da pasta antes de recarregar. Se o Chrome pedir uma permissão nova (a v0.3 adicionou o menu de contexto), aceite.
 
+**Sem API:** se a API estiver fora do ar, a extensão ainda reconhece os **panfletos da demo**. Ela compara a imagem com `demo/img/flyers.json` e aplica as regras no modo local. Assim, a demo funciona em qualquer máquina, inclusive pelo GitHub Pages. Para imagens que não são da demo, é preciso a API: `npm run api` na própria máquina, ou o endereço do ngrok no Painel → Configurações.
+
 ## 6. Versão online (ngrok)
 
 A API serve tudo no mesmo endereço: `/demo/` (vagas fake, Mural, RedePro), `/lp/` (landing page) e a própria API.

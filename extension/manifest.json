@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ELO — Vagas seguras",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Analisa ofertas de emprego e mostra sinais de recrutamento enganoso, tráfico de pessoas e trabalho escravo, com fundamentos.",
   "icons": {
     "16": "icons/icon16.png",

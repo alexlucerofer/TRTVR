@@ -19,7 +19,7 @@ async function waitFor(page, fn, arg, ms = 8000) { const t = Date.now(); while (
 async function waitApi() { for (let i = 0; i < 60; i++) { try { const r = await fetch(API + '/health'); if (r.ok) return true; } catch {} await new Promise((ok) => setTimeout(ok, 250)); } throw new Error('API não subiu'); }
 (async () => {
   await new Promise((ok) => srv.listen(8765, ok));
-  const api = startApi(); await waitApi();
+  const api = startApi(); process.on('exit', () => { try { api.kill(); } catch {} }); await waitApi();
   const ext = path.join(root, 'extension');
   const ctx = await chromium.launchPersistentContext('', { channel: 'chromium', headless: true, args: ['--headless=new', `--disable-extensions-except=${ext}`, `--load-extension=${ext}`] });
   const page = await ctx.newPage(); const errors = []; page.on('pageerror', (e) => errors.push(e.message));
