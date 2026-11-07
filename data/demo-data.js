@@ -113,8 +113,8 @@ const supportResources = [
 
 // Posts da página que imita um feed social (demo/feed.html)
 const feedPosts = [
-  { author: 'Maria (perfil fictício)', text: 'Que dia lindo hoje no parque com as crianças! ☀️' },
-  { author: 'Oportunidades Ásia (página fictícia)', text: '🔥 VAGAS NA TAILÂNDIA 🔥 Contratamos atendentes para empresa de cripto em Bangkok. Salário de US$ 2.800 por mês, não precisa experiência! Passagem paga pela empresa. Vagas limitadas, chama no WhatsApp +855 98 765 432 e envie foto do passaporte. Embarque esta semana!' },
+  { author: 'Maria (perfil fictício)', text: 'Que dia lindo hoje no parque com as crianças!' },
+  { author: 'Oportunidades Ásia (página fictícia)', text: 'VAGAS NA TAILÂNDIA! Contratamos atendentes para empresa de cripto em Bangkok. Salário de US$ 2.800 por mês, não precisa experiência! Passagem paga pela empresa. Vagas limitadas, chama no WhatsApp +855 98 765 432 e envie foto do passaporte. Embarque esta semana!' },
   { author: 'Logística Aurora (fictícia)', text: 'Estamos contratando auxiliar de logística em Campinas/SP. Contrato CLT, salário R$ 2.300 + vale-transporte e vale-refeição. Jornada de 44h semanais. Candidate-se pelo site logistica-aurora.example/vagas. Processo seletivo sem nenhuma taxa.' },
   { author: 'Empreiteiro (perfil fictício)', text: 'Preciso de 15 homens pra trabalhar em fazenda no Mato Grosso, levamos de ônibus, alojamento na fazenda. Passagem e comida descontadas no pagamento, trabalho de domingo a domingo. Salário R$ 180 por dia. Chama no zap.' }
 ];
@@ -123,14 +123,17 @@ const feedPosts = [
 // aqui fica a fonte para gerar o PNG e para os testes compararem o que a leitura da imagem deve encontrar.
 const flyers = [
   { key: 'scam-bangkok', theme: 'asia', lang: 'pt', title: 'TRABALHE NA TAILÂNDIA', company: 'LOTUS DIGITAL SOLUTIONS', role: 'Customer Support / Marketing Digital',
-    lines: ['💵 Salário US$ 1.800 + comissão + bônus', '✅ Não precisa experiência — treinamento do zero', '✅ Inglês básico e saber usar computador', '✅ Teste de digitação: 30 palavras por minuto', '✅ Idade entre 18 e 35 anos', '✈️ Passagem aérea, hotel e alimentação grátis', '🛂 Entrada com visto de turista, nós providenciamos', '🚐 Em Bangkok, transfer de carro até o escritório parceiro na fronteira (Mae Sot)', '⏰ Embarque em 7 dias. Vagas limitadas!'],
-    contact: '📲 Envie foto do passaporte no Telegram @lotus_rh_br', footer: 'Não comente com a família até o contrato sair.' },
+    icons: ['money', 'check', 'check', 'check', 'check', 'plane', 'passport', 'van', 'clock'],
+    lines: ['Salário US$ 1.800 + comissão + bônus', 'Não precisa experiência — treinamento do zero', 'Inglês básico e saber usar computador', 'Teste de digitação: 30 palavras por minuto', 'Idade entre 18 e 35 anos', 'Passagem aérea, hotel e alimentação grátis', 'Entrada com visto de turista, nós providenciamos', 'Em Bangkok, transfer de carro até o escritório parceiro na fronteira (Mae Sot)', 'Embarque em 7 dias. Vagas limitadas!'],
+    contactIcon: 'phone', contact: 'Envie foto do passaporte no Telegram @lotus_rh_br', footer: 'Não comente com a família até o contrato sair.' },
   { key: 'typing-sihanoukville', theme: 'asia2', lang: 'en', title: 'URGENT HIRING — CAMBODIA', company: 'GOLDEN LOTUS CAREERS', role: 'Typing Job / Chat Support (Portuguese & English)',
-    lines: ['💵 Salary USD 1,500 + high commission', '✅ No experience needed', '✅ Typing speed 25 wpm', '✅ Age 18 to 30', '✈️ Free flight ticket, free accommodation and food', '🛂 Tourist visa provided by the company', '📍 Special Economic Zone, Sihanoukville', '⏰ Limited slots, apply today!'],
-    contact: '📲 Contact on Telegram only: @hr_goldenlotus_kh', footer: 'Immediate departure.' },
+    icons: ['money', 'check', 'check', 'check', 'plane', 'passport', 'pin', 'clock'],
+    lines: ['Salary USD 1,500 + high commission', 'No experience needed', 'Typing speed 25 wpm', 'Age 18 to 30', 'Free flight ticket, free accommodation and food', 'Tourist visa provided by the company', 'Special Economic Zone, Sihanoukville', 'Limited slots, apply today!'],
+    contactIcon: 'phone', contact: 'Contact on Telegram only: @hr_goldenlotus_kh', footer: 'Immediate departure.' },
   { key: 'clt-campinas', theme: 'office', lang: 'pt', title: 'ESTAMOS CONTRATANDO', company: 'LOGÍSTICA AURORA (fictícia)', role: 'Auxiliar de Logística — Campinas/SP',
-    lines: ['📄 Contrato CLT, carteira assinada', '💵 R$ 2.300 + vale-transporte + vale-refeição', '🕗 Jornada de 44h semanais, seg a sex', '✅ Ensino fundamental completo', '🏢 Entrevista presencial no nosso CD'],
-    contact: '🌐 Inscrições: logistica-aurora.example/vagas', footer: 'Processo seletivo sem nenhuma taxa.' }
+    icons: ['doc', 'money', 'clock', 'check', 'building'],
+    lines: ['Contrato CLT, carteira assinada', 'R$ 2.300 + vale-transporte + vale-refeição', 'Jornada de 44h semanais, seg a sex', 'Ensino fundamental completo', 'Entrevista presencial no nosso CD'],
+    contactIcon: 'globe', contact: 'Inscrições: logistica-aurora.example/vagas', footer: 'Processo seletivo sem nenhuma taxa.' }
 ].map((f) => ({ ...f, text: [f.title, f.company, f.role, ...f.lines, f.contact, f.footer].join('\n') }));
 
 const data = { flyers, companies, demoJobs, seenJobs, employerRegistry, opportunities, supportResources, feedPosts };

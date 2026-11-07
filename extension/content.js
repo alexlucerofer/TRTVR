@@ -24,10 +24,10 @@
   const IGNORED = () => !!document.querySelector('[data-elo-ignore]');
  
   const LEVEL = {
-    alto_risco: { label: 'Alto risco', color: '#b42318', bg: '#fef3f2', icon: '⚠' },
+    alto_risco: { label: 'Alto risco', color: '#b42318', bg: '#fef3f2', icon: '!' },
     atencao: { label: 'Atenção', color: '#b54708', bg: '#fffaeb', icon: '!' },
     dados_insuficientes: { label: 'Dados insuficientes', color: '#475467', bg: '#f2f4f7', icon: '?' },
-    sem_alertas: { label: 'Sem alertas', color: '#067647', bg: '#ecfdf3', icon: '✓' },
+    sem_alertas: { label: 'Sem alertas', color: '#067647', bg: '#ecfdf3', icon: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>' },
   };
  
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -139,7 +139,7 @@
     const paint = (res) => {
       current = res; const L = LEVEL[res.level];
       btn.style.borderColor = L.color; btn.style.background = L.bg; btn.style.color = L.color;
-      sh.querySelector('.dot').style.background = L.color; sh.querySelector('.dot').textContent = L.icon;
+      sh.querySelector('.dot').style.background = L.color; sh.querySelector('.dot').innerHTML = L.icon;
       const n = res.indicators.length;
       sh.querySelector('.lbl').innerHTML = `ELO: ${L.label}${n ? ' · ' + n + (n > 1 ? ' sinais' : ' sinal') : ''}${res.preliminary ? ' <span class="pre">(preliminar)</span>' : ''}`;
       // motivo visível sem clicar
@@ -202,6 +202,7 @@
     search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
     gov: '<path d="M3 10l9-6 9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 21h18"/>',
     help: '<path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8 9.9a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z"/>',
+    flag: '<path d="M5 21V4M5 4h12l-2 4 2 4H5"/>',
     alert: '<path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
   };
   const icon = (id, size) => svg(ICON_PATHS[id] || ICON_PATHS._default, size);
@@ -367,7 +368,7 @@
       .ic{flex:none;width:32px;height:32px;border-radius:50%;background:${L.color};color:#fff;display:grid;place-items:center;font-weight:700;font-size:16px}
       .head b{color:${L.color};font-size:17px} .body{padding:6px 16px 16px}
       .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid #eaecf0}
-      button.act{font:600 14px system-ui,sans-serif;border-radius:8px;padding:10px 14px;cursor:pointer;border:1px solid #d0d5dd;background:#fff;color:#101828}
+      button.act{display:inline-flex;align-items:center;gap:6px;font:600 14px system-ui,sans-serif;border-radius:8px;padding:10px 14px;cursor:pointer;border:1px solid #d0d5dd;background:#fff;color:#101828}
       button.main{background:#101828;color:#fff;border-color:#101828}
       .tr{background:#f9fafb;border-radius:8px;padding:10px;margin-top:10px;white-space:pre-wrap} .lang{font-size:12px;color:#475467;margin-top:2px}
     </style>
@@ -380,7 +381,7 @@
         ])}
         <div class="actions">
           <button class="act main" type="button" data-a="details">${risky ? 'Ver em detalhes por que parece falsa' : 'Ver análise completa'}</button>
-          <button class="act" type="button" data-a="report">⚑ Reportar este anúncio</button>
+          <button class="act" type="button" data-a="report">${icon('flag', 16)}Reportar este anúncio</button>
           ${canTranslate ? '<button class="act" type="button" data-a="translate">Traduzir anúncio para português</button>' : ''}
         </div>
         <div class="tr" hidden></div>
@@ -432,7 +433,7 @@
       button.err{animation:none;background:#b42318}
       @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
       @media (prefers-reduced-motion: reduce){button{animation:none}}
-    </style><button type="button" aria-label="Verificar esta imagem com o ELO"><span class="ic">🔍</span><span class="t">ELO · Verificar imagem</span></button>`;
+    </style><button type="button" aria-label="Verificar esta imagem com o ELO"><span class="ic">${svg('<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>', 14)}</span><span class="t">ELO · Verificar imagem</span></button>`;
     const btn = sh.querySelector('button');
     document.documentElement.appendChild(host);
     hover = { host, btn, label: sh.querySelector('.t'), img: null, hideT: null };
@@ -552,12 +553,12 @@
       header{display:flex;justify-content:space-between;align-items:start;gap:12px} h2{font-size:18px;margin:0 0 2px;line-height:1.3}
       h3{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#475467;margin:22px 0 8px}
       .close{border:0;background:#f2f4f7;border-radius:8px;padding:8px 12px;cursor:pointer;font:600 13px system-ui,sans-serif}
-      .hbtns{display:flex;gap:6px;flex:none} .rep{border:1px solid #fda29b;background:#fef3f2;color:#b42318;border-radius:8px;padding:8px 12px;cursor:pointer;font:700 13px system-ui,sans-serif}
+      .hbtns{display:flex;gap:6px;flex:none} .rep{display:inline-flex;align-items:center;gap:6px;border:1px solid #fda29b;background:#fef3f2;color:#b42318;border-radius:8px;padding:8px 12px;cursor:pointer;font:700 13px system-ui,sans-serif}
       .lvl{border-radius:12px;padding:12px 14px;margin:14px 0 16px;display:flex;gap:10px;align-items:flex-start}
       .lvl .ic{flex:none;width:28px;height:28px;border-radius:50%;color:#fff;display:grid;place-items:center;font-weight:700}
       .lvl b{font-size:15px} .muted{color:#667085;margin:0}
       form{display:grid;gap:8px} select,textarea{font:inherit;padding:8px;border:1px solid #d0d5dd;border-radius:8px;width:100%} textarea{min-height:80px}
-      .send{background:#101828;color:#fff;border:0;border-radius:8px;padding:10px;font:600 14px system-ui;cursor:pointer}
+      .send{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#101828;color:#fff;border:0;border-radius:8px;padding:10px;font:600 14px system-ui;cursor:pointer}
       .src{font-size:12px;color:#667085;border-top:1px solid #eaecf0;margin-top:20px;padding-top:10px} code{font-size:12px}
       .imgbar{display:flex;gap:12px;align-items:center;border:2px solid;border-radius:12px;padding:10px;margin:14px 0 0}
       .imgbar img{width:64px;height:84px;object-fit:cover;border-radius:8px;flex:none;background:#f2f4f7}
@@ -566,7 +567,7 @@
     </style>
     <div class="back"></div>
     <aside role="dialog" aria-label="Análise ELO">
-      <header><div><h2>${esc(job.title)}</h2><div class="muted">${esc(job.company || 'Empresa não informada')}${job.location ? ' · ' + esc(job.location) : ''}</div></div><div class="hbtns"><button class="rep" type="button">⚑ Reportar</button><button class="close" type="button">Fechar</button></div></header>
+      <header><div><h2>${esc(job.title)}</h2><div class="muted">${esc(job.company || 'Empresa não informada')}${job.location ? ' · ' + esc(job.location) : ''}</div></div><div class="hbtns"><button class="rep" type="button">${icon('flag', 14)}Reportar</button><button class="close" type="button">Fechar</button></div></header>
       ${res.image_extraction ? `<div class="imgbar" style="border-color:${L.color}">${res.image_src && /^(https?:|data:image)/.test(res.image_src) ? `<img src="${esc(res.image_src)}" alt="Imagem analisada">` : ''}<div><div class="kick" style="color:${L.color}">Aviso lido da IMAGEM do anúncio</div><b>${esc(LEVEL[res.level].label)} · ${res.indicators.length} sinal(is)</b><small>${esc(res.image_extraction.engine === 'claude' ? 'Lido por Claude Vision' : res.image_extraction.engine === 'tesseract' ? 'Lido por OCR local (Tesseract)' : 'Leitura de demonstração')} · o texto do golpe estava na imagem, não no post</small></div></div>` : ''}
       <div class="lvl" style="background:${L.bg}"><div class="ic" style="background:${L.color}">${L.icon}</div><div><b style="color:${L.color}">${L.label}${res.preliminary ? ' — análise preliminar' : ''}</b><div>${esc(res.justification)}</div></div></div>
 
@@ -580,7 +581,7 @@
       <form>
         <select name="category"><option value="inconsistencia">Informação inconsistente</option><option value="cobranca">Pediram dinheiro</option><option value="documentos">Pediram/retiveram documentos</option><option value="pressao">Pressão para aceitar</option><option value="outro">Outro</option></select>
         <textarea name="body" placeholder="O que você percebeu? Não inclua seus dados pessoais." maxlength="2000" required minlength="10"></textarea>
-        <button class="send" type="submit">⚑ Reportar anúncio</button>
+        <button class="send" type="submit">${icon('flag', 16)}Reportar anúncio</button>
         <div class="muted msg" role="status"></div>
       </form>
       <div class="src">${source}<br>Regras v${esc(res.rules_version)} · sem IA treinada: regras escritas a partir das fontes citadas.</div>

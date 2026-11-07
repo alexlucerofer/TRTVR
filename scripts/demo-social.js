@@ -53,7 +53,16 @@ module.exports = function buildSocial({ root, D, byKey, NEWS, esc, flyerImg }) {
     calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
     repost: '<path d="M17 2l4 4-4 4M3 11V9a3 3 0 013-3h15M7 22l-4-4 4-4M21 13v2a3 3 0 01-3 3H3"/>'
   };
-  const REACT = (emojis) => `<span class="rx">${emojis.map((e, i) => `<span class="re" style="z-index:${3 - i}">${e}</span>`).join('')}</span>`;
+  // reações: círculos coloridos com ícone (sem emoji)
+  const RX = {
+    like: ['#2d6cdf', '<path d="M7 11v9H4v-9zM7 11l4-8a2 2 0 012 2v4h5a2 2 0 012 2.3l-1.2 7A2 2 0 0116.8 20H7z" fill="#fff"/>'],
+    love: ['#f02849', '<path d="M12 20s-7-4.4-7-9.5A3.8 3.8 0 0112 8a3.8 3.8 0 017 2.5C19 15.6 12 20 12 20z" fill="#fff"/>'],
+    wow: ['#f7b928', '<circle cx="9" cy="10" r="1.4" fill="#5b3a00"/><circle cx="15" cy="10" r="1.4" fill="#5b3a00"/><ellipse cx="12" cy="15.5" rx="2" ry="2.6" fill="#5b3a00"/>'],
+    sad: ['#f7b928', '<circle cx="9" cy="10" r="1.3" fill="#5b3a00"/><circle cx="15" cy="10" r="1.3" fill="#5b3a00"/><path d="M8.5 16.5c2-2 5-2 7 0" stroke="#5b3a00" stroke-width="1.6" fill="none"/>'],
+    clap: ['#3f8f5b', '<path d="M8 13l3-6a1.4 1.4 0 012.5 1.2L12 11l4-4a1.4 1.4 0 012 2l-5 6a4 4 0 01-6 .2L5 13a1.4 1.4 0 012-2z" fill="#fff"/>'],
+    idea: ['#c37d16', '<path d="M12 4a5 5 0 00-3 9v2h6v-2a5 5 0 00-3-9zM10 17h4v2h-4z" fill="#fff"/>']
+  };
+  const REACT = (kinds) => `<span class="rx">${kinds.map((k, i) => `<span class="re" style="z-index:${3 - i};background:${RX[k][0]}"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">${RX[k][1]}</svg></span>`).join('')}</span>`;
   // aviso de simulação: discreto, mas sempre visível (rodapé fixo)
   const SIM = (back) => `<div class="sim" role="note"><b>Simulação ELO</b> · rede, empresas e vagas FICTÍCIAS, com padrões reais documentados (OIT, ONU, Itamaraty, PF). <a href="${back}">Voltar à demonstração</a></div>`;
   const doc = (title, css, body, attr) => `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><style>${css}</style></head><body data-elo-social="${attr}">${body}</body></html>`;
@@ -110,14 +119,14 @@ body{background:var(--m-bg);color:var(--m-ink)}
 
   const me = 'Lucas Ramos';
   const mPosts = [
-    { author: 'Juliana Rocha', when: '1 h', text: 'Primeiro dia no curso técnico de enfermagem! 💙 Obrigada a todo mundo que apoiou.', big: true, rx: ['👍', '❤️'], n: '132', counts: '24 comentários', comments: [['Tia Célia', 'Orgulho demais, minha filha! 🙏', '45 min']] },
-    { group: 'Brasileiros na Tailândia — Vagas e Dicas', author: 'Rafa Agente', when: '3 h', text: 'Ainda tem vaga galera!! Quem tiver interesse chama no Telegram 👇🇹🇭', flyer: 'scam-bangkok',
-      rx: ['👍', '😮', '❤️'], n: '486', counts: '173 comentários · 41 compartilhamentos',
-      comments: [['Bruno Alves', 'Tenho interesse! Precisa saber inglês?', '2 h'], ['Rafa Agente', 'Não precisa, chama no Telegram que te passo tudo 😉', '2 h'], ['Camila Duarte', 'Meu primo foi numa dessas e ficou sem o passaporte lá. Cuidado gente.', '1 h']] },
-    { author: 'Golden Lotus Careers', page: true, when: 'Patrocinado', text: 'Trabalhe no exterior ganhando em dólar 💵✈️ Vagas para quem fala português!', flyer: 'typing-sihanoukville',
-      ext: { host: 'LOTUS-CAREERS.EXAMPLE', title: 'Golden Lotus Careers — Apply now', url: 'https://lotus-careers.example/apply', cta: 'Saiba mais' }, rx: ['👍', '❤️'], n: '1,1 mil', counts: '260 comentários · 88 compartilhamentos' },
-    { author: 'Notícias Brasil', page: true, when: '1 d', text: 'Antes de aceitar proposta de trabalho no Sudeste Asiático, leia isto 👇', news: NEWS[0], rx: ['😢', '👍', '😮'], n: '5,2 mil', counts: '612 comentários · 980 compartilhamentos' },
-    { author: 'Logística Aurora (fictícia)', page: true, when: '2 d', text: 'Vagas abertas em Campinas! Confira os detalhes no cartaz. 📦', flyer: 'clt-campinas', rx: ['👍'], n: '64', counts: '7 comentários' }
+    { author: 'Juliana Rocha', when: '1 h', text: 'Primeiro dia no curso técnico de enfermagem! Obrigada a todo mundo que apoiou.', big: true, rx: ['like', 'love'], n: '132', counts: '24 comentários', comments: [['Tia Célia', 'Orgulho demais, minha filha!', '45 min']] },
+    { group: 'Brasileiros na Tailândia — Vagas e Dicas', author: 'Rafa Agente', when: '3 h', text: 'Ainda tem vaga galera!! Quem tiver interesse chama no Telegram', flyer: 'scam-bangkok',
+      rx: ['like', 'wow', 'love'], n: '486', counts: '173 comentários · 41 compartilhamentos',
+      comments: [['Bruno Alves', 'Tenho interesse! Precisa saber inglês?', '2 h'], ['Rafa Agente', 'Não precisa, chama no Telegram que te passo tudo', '2 h'], ['Camila Duarte', 'Meu primo foi numa dessas e ficou sem o passaporte lá. Cuidado gente.', '1 h']] },
+    { author: 'Golden Lotus Careers', page: true, when: 'Patrocinado', text: 'Trabalhe no exterior ganhando em dólar Vagas para quem fala português!', flyer: 'typing-sihanoukville',
+      ext: { host: 'LOTUS-CAREERS.EXAMPLE', title: 'Golden Lotus Careers — Apply now', url: 'https://lotus-careers.example/apply', cta: 'Saiba mais' }, rx: ['like', 'love'], n: '1,1 mil', counts: '260 comentários · 88 compartilhamentos' },
+    { author: 'Notícias Brasil', page: true, when: '1 d', text: 'Antes de aceitar proposta de trabalho no Sudeste Asiático, leia isto', news: NEWS[0], rx: ['sad', 'like', 'wow'], n: '5,2 mil', counts: '612 comentários · 980 compartilhamentos' },
+    { author: 'Logística Aurora (fictícia)', page: true, when: '2 d', text: 'Vagas abertas em Campinas! Confira os detalhes no cartaz.', flyer: 'clt-campinas', rx: ['like'], n: '64', counts: '7 comentários' }
   ];
   const mPost = (p, i) => `<div class="post card" aria-posinset="${i + 1}" aria-setsize="-1" data-post-id="mural-${i}">
   <div class="ph">
@@ -244,13 +253,13 @@ dialog{border:0;border-radius:8px;max-width:480px;padding:20px} dialog::backdrop
     <div class="sv">${I(ICON.bookmark, 16)}Itens salvos</div></div>`;
   const pPosts = [
     { urn: '7391200000000000001', author: 'Ana Lima', deg: '3º+', headline: 'Talent Acquisition | Lotus Digital Solutions · Recrutamento internacional', when: '6 h', ctx: 'Marcos Vieira comentou isto',
-      text: '<span class="tag">#hiring</span> 🚀 Oportunidade internacional para brasileiros!\nCustomer Support em Bangkok. Todos os detalhes no flyer.\nInteressados, comentem "EU QUERO" que eu chamo no privado. 🙌', flyer: 'scam-bangkok', job: v11, rx: ['👍', '👏', '💡'], n: '312', counts: '198 comentários · 24 compartilhamentos' },
+      text: '<span class="tag">#hiring</span> Oportunidade internacional para brasileiros!\nCustomer Support em Bangkok. Todos os detalhes no flyer.\nInteressados, comentem "EU QUERO" que eu chamo no privado.', flyer: 'scam-bangkok', job: v11, rx: ['like', 'clap', 'idea'], n: '312', counts: '198 comentários · 24 compartilhamentos' },
     { urn: '7391200000000000002', author: 'Carlos Menezes', deg: '2º', headline: 'Coordenador de Logística na Logística Aurora (fictícia)', when: '1 d',
-      text: 'Estamos contratando auxiliares de logística em Campinas/SP, CLT, R$ 2.300 + benefícios, 44h semanais. Inscrições pelo site logistica-aurora.example/vagas. Processo seletivo gratuito, sem nenhuma taxa. <span class="tag">#vagas</span> <span class="tag">#campinas</span>', rx: ['👍', '❤️'], n: '88', counts: '12 comentários' },
+      text: 'Estamos contratando auxiliares de logística em Campinas/SP, CLT, R$ 2.300 + benefícios, 44h semanais. Inscrições pelo site logistica-aurora.example/vagas. Processo seletivo gratuito, sem nenhuma taxa. <span class="tag">#vagas</span> <span class="tag">#campinas</span>', rx: ['like', 'love'], n: '88', counts: '12 comentários' },
     { urn: '7391200000000000003', author: 'Patrícia Gomes', deg: '1º', headline: 'Analista de Dados | SQL · Python · Power BI', when: '2 d', ctx: 'Patrícia Gomes começou em um novo cargo',
-      text: 'Feliz em compartilhar que estou começando em um novo cargo como Analista de Dados! 🎉 Obrigada a todos que me ajudaram nessa jornada.', rx: ['👏', '❤️', '👍'], n: '540', counts: '96 comentários' },
+      text: 'Feliz em compartilhar que estou começando em um novo cargo como Analista de Dados! Obrigada a todos que me ajudaram nessa jornada.', rx: ['clap', 'love', 'like'], n: '540', counts: '96 comentários' },
     { urn: '7391200000000000004', author: 'Hotel Atlântico Lda (fictício)', company: true, headline: '1.204 seguidores · Hotelaria · Porto, Portugal', when: '3 d',
-      text: 'Vagas de cozinheiro(a) no Porto. Contrato de trabalho escrito enviado antes da viagem e apoio ao visto de trabalho. € 1.150 por mês. Seleção sem taxas, entrevista por vídeo.', job: byKey.v6, jobHref: '../vaga/' + byKey.v6.slug + '.html', rx: ['👍'], n: '205', counts: '31 comentários' }
+      text: 'Vagas de cozinheiro(a) no Porto. Contrato de trabalho escrito enviado antes da viagem e apoio ao visto de trabalho. € 1.150 por mês. Seleção sem taxas, entrevista por vídeo.', job: byKey.v6, jobHref: '../vaga/' + byKey.v6.slug + '.html', rx: ['like'], n: '205', counts: '31 comentários' }
   ];
   const pPost = (p) => `<div class="pc fs" data-urn="urn:li:activity:${p.urn}">
   ${p.ctx ? `<div class="ctx">${esc(p.ctx)}</div>` : ''}

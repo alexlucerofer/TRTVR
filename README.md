@@ -153,7 +153,7 @@ Leitura da imagem, nesta ordem:
 
 **Na extensão:** passe o mouse sobre a imagem de um post ou de uma vaga. Aparece o botão **"ELO · Verificar imagem"** no canto inferior esquerdo. Também dá para clicar com o botão direito → **Verificar esta imagem com o ELO**, ou usar o Painel → **Analisar imagem**. O resultado repinta o selo do post e abre o painel com "Aviso lido da IMAGEM do anúncio".
 
-**Reportar anúncio:** o botão **⚑ Reportar** fica no painel e na análise no meio da página da vaga. O relato (categoria, comentário, texto do anúncio, nível e sinais) vai para `POST /v1/relatos`. A partir daí, anúncios com texto parecido ou com o **mesmo contato** (telefone, e-mail, @Telegram) mostram "Já reportado por usuários". Isso é uma nota: relatos sozinhos não mudam o nível de risco. Relatos rejeitados em `PATCH /v1/gestao/relatos/{id}` saem da base de comparação.
+**Reportar anúncio:** o botão **Reportar** fica no painel e na análise no meio da página da vaga. O relato (categoria, comentário, texto do anúncio, nível e sinais) vai para `POST /v1/relatos`. A partir daí, anúncios com texto parecido ou com o **mesmo contato** (telefone, e-mail, @Telegram) mostram "Já reportado por usuários". Isso é uma nota: relatos sozinhos não mudam o nível de risco. Relatos rejeitados em `PATCH /v1/gestao/relatos/{id}` saem da base de comparação.
 
 **Atualizar a extensão:** depois de baixar a versão nova (ou de um `git pull`), abra `chrome://extensions` e clique no ícone de recarregar (↻) no cartão do ELO. Em seguida, recarregue as abas que já estavam abertas. Se você instalou pelo zip, substitua o conteúdo da pasta antes de recarregar. Se o Chrome pedir uma permissão nova (a v0.3 adicionou o menu de contexto), aceite.
 

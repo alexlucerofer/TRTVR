@@ -139,19 +139,19 @@ filtrar();
 // ---------- rede social "Conecta"
 const byKey = Object.fromEntries(D.demoJobs.map((j) => [j.key, j]));
 const posts = [
-  { author: 'Maria Souza (perfil fictício)', when: '2 h', text: 'Que dia lindo hoje no parque com as crianças! ☀️', react: '48 reações · 6 comentários' },
+  { author: 'Maria Souza (perfil fictício)', when: '2 h', text: 'Que dia lindo hoje no parque com as crianças!', react: '48 reações · 6 comentários' },
   { author: 'Oportunidades Ásia (página fictícia)', when: 'Patrocinado', text: D.feedPosts[1].text, link: byKey.v4, img: 'asia', react: '1,2 mil reações · 340 comentários' },
   { author: 'Hotel Atlântico Lda (fictício)', when: '5 h', text: 'Estamos contratando cozinheiro(a) para o Porto, Portugal. Contrato de trabalho escrito antes da viagem e apoio ao visto de trabalho. Salário € 1.150 por mês. Processo seletivo sem nenhuma taxa, entrevista por vídeo. Candidaturas pelo site hotelatlantico.example/carreiras.', link: byKey.v6, img: 'kitchen', react: '210 reações · 18 comentários' },
-  { author: 'Notícias Brasil (página fictícia)', when: '1 d', text: 'Atenção antes de aceitar proposta de trabalho no exterior 👇', news: NEWS[0], react: '3,4 mil reações · 512 compartilhamentos' },
+  { author: 'Notícias Brasil (página fictícia)', when: '1 d', text: 'Atenção antes de aceitar proposta de trabalho no exterior', news: NEWS[0], react: '3,4 mil reações · 512 compartilhamentos' },
   { author: 'Empreiteiro Zé (perfil fictício)', when: '8 h', text: D.feedPosts[3].text, link: byKey.v5, img: 'farm', react: '96 reações · 41 comentários' },
 ];
 const later = [
-  { author: 'Star Talents Agency (página fictícia)', when: 'Patrocinado', text: 'VAGAS EM DUBAI ✨ Procuramos mulheres de 18 a 25 anos para recepcionista e modelo em eventos de luxo. Salário de US$ 4.000, não precisa experiência! Envie fotos de corpo inteiro pelo direct. Passagem paga. Vagas limitadas!', link: byKey.v7, img: 'desert', react: '880 reações · 205 comentários' },
+  { author: 'Star Talents Agency (página fictícia)', when: 'Patrocinado', text: 'VAGAS EM DUBAI Procuramos mulheres de 18 a 25 anos para recepcionista e modelo em eventos de luxo. Salário de US$ 4.000, não precisa experiência! Envie fotos de corpo inteiro pelo direct. Passagem paga. Vagas limitadas!', link: byKey.v7, img: 'desert', react: '880 reações · 205 comentários' },
   { author: 'Pacific Bridge Staffing (página fictícia)', when: '3 h', text: 'We are hiring Portuguese speakers in Bangkok! Customer support, USD 2,200 per month, no experience needed. Free flight ticket. Pay the visa processing fee and send a photo of your passport on Telegram. Limited slots, apply today!', link: byKey.v9, img: 'asia', react: '430 reações · 97 comentários' },
   { author: 'Logística Aurora (fictícia)', when: '1 d', text: D.feedPosts[2].text, img: 'office', react: '75 reações · 9 comentários' },
 ];
 const postHtml = (p, i) => `<div role="article" class="post">
-  <div class="ph">${avatar(p.author)}<div><b>${esc(p.author)}</b><span class="meta">${esc(p.when)} · 🌐</span></div></div>
+  <div class="ph">${avatar(p.author)}<div><b>${esc(p.author)}</b><span class="meta">${esc(p.when)} · Público</span></div></div>
   <div class="tx">${esc(p.text)}</div>
   ${p.img ? art(p.img, p.text.slice(0, 60)) : ''}
   ${p.news ? `<a class="preview" href="${esc(p.news.url)}" target="_blank" rel="noopener">${art('news', p.news.title)}<div><small>${esc(p.news.site)}</small><br><b>${esc(p.news.title)}</b></div></a>` : ''}

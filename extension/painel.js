@@ -28,7 +28,7 @@
     const profile = { areas: vals('areas'), regioes: vals('regioes'), origem_uf: $('uf').value || null };
     await chrome.storage.local.set({ profile });
     const sample = R.analyze({ title: 'Atendimento em Bangkok', description: 'Vaga de atendimento em Bangkok, Tailândia, sem experiência, salário US$ 1.800, passagem grátis, visto de turista, Telegram.' }, { profile });
-    $('out-perfil').innerHTML = '✓ Perfil salvo. ' + (sample.profile_notes.length ? 'Exemplo de aviso numa vaga de atendimento na Tailândia:<br><i>' + sample.profile_notes.map(esc).join('<br>') + '</i>' : 'Com este perfil, avisos aparecem quando a vaga combina com a sua área/região.');
+    $('out-perfil').innerHTML = 'Perfil salvo. ' + (sample.profile_notes.length ? 'Exemplo de aviso numa vaga de atendimento na Tailândia:<br><i>' + sample.profile_notes.map(esc).join('<br>') + '</i>' : 'Com este perfil, avisos aparecem quando a vaga combina com a sua área/região.');
   };
   $('clear-perfil').onclick = async () => { await chrome.storage.local.remove('profile'); document.querySelectorAll('#p-perfil input').forEach((i) => (i.checked = false)); $('uf').value = ''; $('out-perfil').textContent = 'Perfil apagado.'; };
 
@@ -62,7 +62,7 @@
     const r = await chrome.runtime.sendMessage({ type: 'analyzeImage', dataUrl, caption: $('cap').value });
     $('go-img').disabled = false;
     if (!r.ok) { $('out-img-err').innerHTML = `<span class="err">${esc(r.error)}</span>`; $('res-img').innerHTML = ''; return; }
-    $('out-img-err').innerHTML = `<span class="okc">✓ Análise nº ${esc(r.result.api_analysis_id)} registrada.</span> <a href="#" id="to-rev">Revisar extração</a>`;
+    $('out-img-err').innerHTML = `<span class="okc">Análise nº ${esc(r.result.api_analysis_id)} registrada.</span> <a href="#" id="to-rev">Revisar extração</a>`;
     $('to-rev').onclick = (e) => { e.preventDefault(); openReview(r.result.api_analysis_id); };
     $('res-img').innerHTML = resultHTML(r.result, r.result.image_extraction);
   };
@@ -119,7 +119,7 @@
       const r = await fetch(api() + '/v1/gestao/analises/' + current.id, { method: 'PATCH', headers: { ...adminHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const d = await r.json(); if (!r.ok) throw new Error(typeof d.detail === 'string' ? d.detail : JSON.stringify(d.detail));
       await openReview(current.id);
-      $('out-rev').innerHTML = `<span class="okc">✓ Reanalisado: ${LBL[d.nivel_antes]} → ${LBL[d.analise.level]}</span>`;
+      $('out-rev').innerHTML = `<span class="okc">Reanalisado: ${LBL[d.nivel_antes]} → ${LBL[d.analise.level]}</span>`;
     } catch (e) { $('out-rev').innerHTML = `<span class="err">${esc(e.message)}</span>`; }
     $('go-rev').disabled = false;
   };
@@ -131,10 +131,10 @@
     $('out-api').textContent = 'Testando…';
     try {
       const h = await (await fetch(api() + '/health', { headers: { 'ngrok-skip-browser-warning': '1' } })).json();
-      const lines = [`✓ API ${h.version} no ar.`, `Leitura de imagem: ${h.leitores.claude ? 'Claude Vision' : '—'}${h.leitores.tesseract ? (h.leitores.claude ? ' + ' : '') + 'Tesseract' : ''}${!h.leitores.claude && !h.leitores.tesseract ? ' NENHUM (defina ANTHROPIC_API_KEY ou instale o Tesseract)' : ''}.`];
-      if ($('admin').value.trim()) { const g = await fetch(api() + '/v1/gestao/analises?limit=1', { headers: adminHeaders() }); lines.push(g.ok ? '✓ Chave de administrador aceita.' : '✗ Chave de administrador recusada (' + g.status + ').'); }
+      const lines = [`API ${h.version} no ar.`, `Leitura de imagem: ${h.leitores.claude ? 'Claude Vision' : '—'}${h.leitores.tesseract ? (h.leitores.claude ? ' + ' : '') + 'Tesseract' : ''}${!h.leitores.claude && !h.leitores.tesseract ? ' NENHUM (defina ANTHROPIC_API_KEY ou instale o Tesseract)' : ''}.`];
+      if ($('admin').value.trim()) { const g = await fetch(api() + '/v1/gestao/analises?limit=1', { headers: adminHeaders() }); lines.push(g.ok ? 'Chave de administrador aceita.' : 'Chave de administrador recusada (' + g.status + ').'); }
       $('out-api').textContent = lines.join('\n') + '\nRecarregue as abas abertas para aplicar o envio automático.';
-    } catch (e) { $('out-api').textContent = '✗ API fora do ar em ' + api() + ' (' + e.message + '). Rode "npm run api".'; }
+    } catch (e) { $('out-api').textContent = 'API fora do ar em ' + api() + ' (' + e.message + '). Rode "npm run api".'; }
   };
 
   // ---------------- configurações: Supabase (antiga página de opções)
@@ -143,7 +143,7 @@
     const url = $('url').value.trim().replace(/\/$/, ''), key = $('key').value.trim();
     const out = $('out');
     if (/service_role|sb_secret_/.test(key) || (key.startsWith('eyJ') && (() => { try { return JSON.parse(atob(key.split('.')[1])).role === 'service_role'; } catch { return false; } })())) {
-      out.textContent = '✗ Esta é a chave SERVICE ROLE/secret. Não use no navegador. Use a anon/publishable.'; return;
+      out.textContent = 'Esta é a chave SERVICE ROLE/secret. Não use no navegador. Use a anon/publishable.'; return;
     }
     await chrome.storage.local.set({ supabaseUrl: url, anonKey: key });
     if (!url) { out.textContent = 'Supabase desligado: a extensão usa o modo local.'; return; }
@@ -157,7 +157,7 @@
         body: JSON.stringify({ job: { title: 'Teste de conexão ELO', description: 'Teste automático do painel.', url: 'https://elo-demo.local/teste-conexao', source: 'demo' } }) });
       const d2 = await r2.json();
       if (!r2.ok) throw new Error('Edge Function analyze: ' + (d2.error || r2.status));
-      out.textContent = `✓ Banco: ${d1.length} canais de apoio lidos (ex.: ${d1[0]?.institution}).\n✓ Edge Function: análise gravada com id ${d2.analysis_id}.`;
-    } catch (e) { out.textContent = '✗ ' + e.message + '\nA extensão continuará em modo local até a conexão funcionar.'; }
+      out.textContent = `Banco: ${d1.length} canais de apoio lidos (ex.: ${d1[0]?.institution}).\nEdge Function: análise gravada com id ${d2.analysis_id}.`;
+    } catch (e) { out.textContent = 'Erro: ' + e.message + '\nA extensão continuará em modo local até a conexão funcionar.'; }
   };
 })();
