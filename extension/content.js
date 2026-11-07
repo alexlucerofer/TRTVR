@@ -20,6 +20,8 @@
   let autoImage = false; // painel: "enviar imagens de posts automaticamente"
   const done = new WeakMap(); // elemento -> hash do texto analisado
   let paused = false;
+  // páginas que FALAM de golpes (ex.: landing page do ELO) não são anúncios: <body data-elo-ignore>
+  const IGNORED = () => !!document.querySelector('[data-elo-ignore]');
  
   const LEVEL = {
     alto_risco: { label: 'Alto risco', color: '#b42318', bg: '#fef3f2', icon: '⚠' },
@@ -251,6 +253,7 @@
     .okbox{display:flex;gap:10px;align-items:flex-start;background:#ecfdf3;color:#067647;border-radius:12px;padding:12px}
     .okbox div{color:#101828}
     ul.plain{margin:0;padding-left:18px} ul.plain li{margin:0 0 6px}
+    .cbox{display:flex;gap:10px;align-items:flex-start;background:#fffaeb;color:#b54708;border:1px solid #fedf89;border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:13px} .cbox div{color:#101828} .cbox b{color:#b54708;display:block}
     .pbox{display:flex;gap:10px;align-items:flex-start;background:#eff8ff;color:#175cd3;border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:13px} .pbox div{color:#101828}
     dl.ex{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;margin:4px 0;font-size:13px} dl.ex dt{color:#667085} dl.ex dd{margin:0;overflow-wrap:anywhere}
     details.raw summary{cursor:pointer;font-size:13px;color:#175cd3;margin-top:6px} details.raw pre{white-space:pre-wrap;font-size:12px;background:#f9fafb;border-radius:8px;padding:8px;max-height:220px;overflow:auto}
@@ -280,6 +283,7 @@
   }
 
   // notas do perfil (área de interesse e região, do Painel) — nunca mudam o nível
+  const communityBox = (res) => (res.community_notes || []).length ? `<div class="cbox">${icon('ANUNCIO_REPLICADO', 18)}<div><b>Já reportado por usuários</b>${res.community_notes.map((n) => `<div>${esc(n)}</div>`).join('')}</div></div>` : '';
   const profileBox = (res) => (res.profile_notes || []).length ? `<div class="pbox">${icon('help', 18)}<div>${res.profile_notes.map((n) => `<div>${esc(n)}</div>`).join('')}</div></div>` : '';
   // o que a API leu da imagem
   function imageSection(res) {
@@ -301,7 +305,7 @@
     const L = LEVEL[res.level];
     const list = sortBySeverity(res.indicators);
     if (!list.length) {
-      return `${profileBox(res)}<div class="okbox">${icon('ok', 22)}<div><b>Nenhum sinal de risco no texto${res.preliminary ? ' disponível' : ''}.</b><br>Mesmo assim, confirme a empresa e nunca pague para se candidatar.</div></div>`;
+      return `${communityBox(res)}${profileBox(res)}<div class="okbox">${icon('ok', 22)}<div><b>Nenhum sinal de risco no texto${res.preliminary ? ' disponível' : ''}.</b><br>Mesmo assim, confirme a empresa e nunca pague para se candidatar.</div></div>`;
     }
     const [main, ...rest] = list;
     const S = sev(main.severity);
@@ -311,7 +315,7 @@
       ${(full ? a.evidence : a.evidence.slice(0, 1)).map((e) => `<q class="quote" style="color:${s.color}"><span style="color:#344054">${esc(e)}</span></q>`).join('')}
       ${full && basis ? `<div class="basis">Fundamento: ${basis(a.basis)}</div>` : ''}</div></div>`; };
     const why = full ? '' : `<div class="sec">${icon('alert', 16)}Por que parece ${res.level === 'alto_risco' ? 'falsa ou perigosa' : 'suspeita'}</div>`;
-    return `${profileBox(res)}${why}<div class="hero" style="background:${L.bg};border-color:${L.color}33">
+    return `${communityBox(res)}${profileBox(res)}${why}<div class="hero" style="background:${L.bg};border-color:${L.color}33">
         <div class="hi" style="background:${S.color}">${icon(main.id, 24)}</div>
         <div style="flex:1;min-width:0"><div class="kicker" style="color:${S.color}">Alerta principal · ${S.label}</div>
           <div class="t">${esc(main.title)}</div>
@@ -376,6 +380,7 @@
         ])}
         <div class="actions">
           <button class="act main" type="button" data-a="details">${risky ? 'Ver em detalhes por que parece falsa' : 'Ver análise completa'}</button>
+          <button class="act" type="button" data-a="report">⚑ Reportar este anúncio</button>
           ${canTranslate ? '<button class="act" type="button" data-a="translate">Traduzir anúncio para português</button>' : ''}
         </div>
         <div class="tr" hidden></div>
@@ -383,6 +388,7 @@
     </div>`;
     wireTabs(sh);
     sh.querySelector('[data-a="details"]').onclick = () => openPanel(job, res);
+    sh.querySelector('[data-a="report"]').onclick = () => openPanel(job, res, { report: true });
     const tb = sh.querySelector('[data-a="translate"]');
     if (tb) tb.onclick = async () => { const box = sh.querySelector('.tr'); box.hidden = false; box.textContent = 'Traduzindo no seu navegador…'; box.textContent = (await translate(job.description, res.lang)) || 'Não foi possível traduzir neste Chrome.'; };
     if (slot) slot.replaceChildren(host);
@@ -390,7 +396,7 @@
   }
 
   function scan() {
-    if (paused) return;
+    if (paused || IGNORED()) return;
     let found = false;
     for (const el of document.querySelectorAll('[data-elo-job]')) { found = true; process(el, fromDataAttr(el), 'after', el.querySelector('[data-elo-title]') || el); }
     if (found) return;
@@ -454,7 +460,7 @@
   }
   function scheduleHide() { const h = ensureHover(); clearTimeout(h.hideT); h.hideT = setTimeout(() => { if (!h.btn.classList.contains('busy')) h.host.style.display = 'none'; }, 350); }
   document.addEventListener('mouseover', (e) => {
-    if (paused) return;
+    if (paused || IGNORED()) return;
     const img = e.target && e.target.closest ? e.target.closest('img') : null;
     if (!imageEligible(img)) return;
     const h = ensureHover(); clearTimeout(h.hideT);
@@ -516,7 +522,7 @@
 
   // ------------------------------------------------------------------ painel
   let panelHost = null;
-  function openPanel(job, res) {
+  function openPanel(job, res, { report = false } = {}) {
     panelHost?.remove();
     panelHost = document.createElement('elo-panel');
     panelHost.style.cssText = 'all:initial;position:fixed;inset:0;z-index:2147483647;';
@@ -546,6 +552,7 @@
       header{display:flex;justify-content:space-between;align-items:start;gap:12px} h2{font-size:18px;margin:0 0 2px;line-height:1.3}
       h3{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#475467;margin:22px 0 8px}
       .close{border:0;background:#f2f4f7;border-radius:8px;padding:8px 12px;cursor:pointer;font:600 13px system-ui,sans-serif}
+      .hbtns{display:flex;gap:6px;flex:none} .rep{border:1px solid #fda29b;background:#fef3f2;color:#b42318;border-radius:8px;padding:8px 12px;cursor:pointer;font:700 13px system-ui,sans-serif}
       .lvl{border-radius:12px;padding:12px 14px;margin:14px 0 16px;display:flex;gap:10px;align-items:flex-start}
       .lvl .ic{flex:none;width:28px;height:28px;border-radius:50%;color:#fff;display:grid;place-items:center;font-weight:700}
       .lvl b{font-size:15px} .muted{color:#667085;margin:0}
@@ -559,7 +566,7 @@
     </style>
     <div class="back"></div>
     <aside role="dialog" aria-label="Análise ELO">
-      <header><div><h2>${esc(job.title)}</h2><div class="muted">${esc(job.company || 'Empresa não informada')}${job.location ? ' · ' + esc(job.location) : ''}</div></div><button class="close" type="button">Fechar</button></header>
+      <header><div><h2>${esc(job.title)}</h2><div class="muted">${esc(job.company || 'Empresa não informada')}${job.location ? ' · ' + esc(job.location) : ''}</div></div><div class="hbtns"><button class="rep" type="button">⚑ Reportar</button><button class="close" type="button">Fechar</button></div></header>
       ${res.image_extraction ? `<div class="imgbar" style="border-color:${L.color}">${res.image_src && /^(https?:|data:image)/.test(res.image_src) ? `<img src="${esc(res.image_src)}" alt="Imagem analisada">` : ''}<div><div class="kick" style="color:${L.color}">Aviso lido da IMAGEM do anúncio</div><b>${esc(LEVEL[res.level].label)} · ${res.indicators.length} sinal(is)</b><small>${esc(res.image_extraction.engine === 'claude' ? 'Lido por Claude Vision' : res.image_extraction.engine === 'tesseract' ? 'Lido por OCR local (Tesseract)' : 'Leitura de demonstração')} · o texto do golpe estava na imagem, não no post</small></div></div>` : ''}
       <div class="lvl" style="background:${L.bg}"><div class="ic" style="background:${L.color}">${L.icon}</div><div><b style="color:${L.color}">${L.label}${res.preliminary ? ' — análise preliminar' : ''}</b><div>${esc(res.justification)}</div></div></div>
 
@@ -568,11 +575,12 @@
         { label: 'Vagas verdadeiras', icon: 'job', count: nJobs, show: res.level !== 'sem_alertas' && nJobs > 0, html: jobsTab(res, { altTitle: 'Vagas parecidas verificadas', portalTitle: 'Onde procurar vagas reais com segurança' }) },
       ])}
 
-      <h3>Relatar inconsistência</h3>
+      <h3 id="elo-report">Reportar este anúncio à base ELO</h3>
+      <p class="muted" style="font-size:13px">O anúncio entra na base de comparação: outros anúncios parecidos ou com o mesmo contato (telefone, e-mail, Telegram) passam a mostrar este relato para outras pessoas. Não envie seus dados pessoais.</p>
       <form>
         <select name="category"><option value="inconsistencia">Informação inconsistente</option><option value="cobranca">Pediram dinheiro</option><option value="documentos">Pediram/retiveram documentos</option><option value="pressao">Pressão para aceitar</option><option value="outro">Outro</option></select>
         <textarea name="body" placeholder="O que você percebeu? Não inclua seus dados pessoais." maxlength="2000" required minlength="10"></textarea>
-        <button class="send" type="submit">Enviar para moderação</button>
+        <button class="send" type="submit">⚑ Reportar anúncio</button>
         <div class="muted msg" role="status"></div>
       </form>
       <div class="src">${source}<br>Regras v${esc(res.rules_version)} · sem IA treinada: regras escritas a partir das fontes citadas.</div>
@@ -580,11 +588,16 @@
     wireTabs(sh);
     const close = () => { panelHost?.remove(); panelHost = null; };
     sh.querySelector('.close').onclick = close; sh.querySelector('.back').onclick = close;
+    const goReport = () => { sh.getElementById('elo-report').scrollIntoView({ behavior: 'smooth', block: 'start' }); sh.querySelector('textarea').focus({ preventScroll: true }); };
+    sh.querySelector('.rep').onclick = goReport;
+    if (report) setTimeout(goReport, 50);
     sh.querySelector('form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const f = e.target, msg = sh.querySelector('.msg');
       msg.textContent = 'Enviando…';
-      const r = await send({ type: 'report', payload: { job_url: job.url, category: f.category.value, body: f.body.value } });
+      const r = await send({ type: 'report', payload: { job_url: /^https?:/.test(job.url || '') ? job.url : null, category: f.category.value, body: f.body.value },
+        job: { title: job.title, description: job.description, company: job.company, location: job.location, salary: job.salary, url: job.url },
+        result: { level: res.level, indicators: res.indicators, image_sha256: res.image_sha256 } });
       msg.textContent = r.ok ? (r.result.message || 'Relato registrado como pendente de moderação.') : 'Erro: ' + r.error;
       if (r.ok) f.body.value = '';
     });

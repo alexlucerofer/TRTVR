@@ -39,6 +39,18 @@ create table if not exists correcoes (
   nivel_antes text not null,
   nivel_depois text not null
 );
+create table if not exists relatos (
+  id integer primary key autoincrement,
+  criado_em text not null,
+  categoria text not null,
+  texto text,
+  status text not null default 'pendente' check (status in ('pendente','aprovado','rejeitado')),
+  titulo text, empresa text, url text,
+  nivel text, indicadores text,
+  imagem_sha256 text,
+  contatos text,
+  job_json text not null
+);
 create table if not exists inscricoes (
   id integer primary key autoincrement,
   criado_em text not null,
@@ -132,6 +144,41 @@ class Store:
                 "update analises set titulo = ?, empresa = ?, nivel = ?, regioes = ?, job_json = ?, resultado_json = ? where id = ?",
                 (job_depois.get("title"), job_depois.get("company"), result["level"], ",".join(regioes), _dump(job_depois), _dump(result), analise_id),
             )
+
+    # ---------------- relatos (base de comparação)
+    def report(self, *, categoria: str, texto: str | None, job: dict, nivel: str | None, indicadores: list[str], imagem_sha256: str | None, contatos: list[str]) -> dict:
+        with self._lock, self._db:
+            cur = self._db.execute(
+                "insert into relatos (criado_em, categoria, texto, titulo, empresa, url, nivel, indicadores, imagem_sha256, contatos, job_json) values (?,?,?,?,?,?,?,?,?,?,?)",
+                (_now(), categoria, texto, job.get("title"), job.get("company"), job.get("url"), nivel, ",".join(indicadores), imagem_sha256, ",".join(contatos), _dump(job)),
+            )
+            rid = int(cur.lastrowid)
+        return self.get_report(rid)
+
+    @staticmethod
+    def _report_row(r: sqlite3.Row) -> dict:
+        d = dict(r)
+        d["job"] = json.loads(d.pop("job_json"))
+        d["indicadores"] = [x for x in (d["indicadores"] or "").split(",") if x]
+        d["contatos"] = [x for x in (d["contatos"] or "").split(",") if x]
+        return d
+
+    def get_report(self, rid: int) -> dict | None:
+        with self._lock:
+            r = self._db.execute("select * from relatos where id = ?", (rid,)).fetchone()
+        return self._report_row(r) if r else None
+
+    def reports(self, status: str | None = None, limit: int = 200) -> list[dict]:
+        sql, args = "select * from relatos", []
+        if status:
+            sql += " where status = ?"; args.append(status)
+        sql += " order by id desc limit ?"; args.append(max(1, min(limit, 5000)))
+        with self._lock:
+            return [self._report_row(r) for r in self._db.execute(sql, args).fetchall()]
+
+    def set_report_status(self, rid: int, status: str) -> None:
+        with self._lock, self._db:
+            self._db.execute("update relatos set status = ? where id = ?", (status, rid))
 
     def subscribe(self, d: dict) -> int:
         cols = ["regiao_estimada", "pais_estimado", "lat", "lon", "precisao_m", "idioma", "idiomas", "fuso_horario", "telefone", "whatsapp_ok", "email", "perfil_json", "pagina", "referrer"]

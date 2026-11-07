@@ -373,8 +373,14 @@
     if (lang !== 'pt') verified.push({ item: 'Idioma do anúncio', value: LANG_NAME[lang] + ' — analisado também com as regras em ' + LANG_NAME[lang], source: 'Detecção automática' });
     const theme = jobTheme(text);
     const profile_notes = profileNotes(facts.profile, c, theme);
+    // relatos da comunidade: anúncios parecidos ou com o mesmo contato já reportados (nota; relatos sozinhos não mudam o nível)
+    const community_notes = (facts.reported_similar || []).map((r) => {
+      const how = r.shared && r.shared.length ? 'usa o mesmo contato (' + r.shared.map((k) => k.replace(/^(tel|mail|tg):/, '')).slice(0, 2).join(', ') + ')' : 'tem texto ' + Math.round(r.similarity * 100) + '% parecido';
+      return 'Este anúncio ' + how + ' de um anúncio reportado por usuários em ' + String(r.seen_at || '').slice(0, 10) + (r.title ? ' ("' + String(r.title).slice(0, 80) + '")' : '') + (r.status === 'aprovado' ? ' — relato confirmado pela moderação.' : ' — relato ainda não moderado.');
+    });
+    for (const cn of community_notes) verified.push({ item: 'Relatos de usuários (base ELO)', value: cn, source: 'API ELO — relatos' });
     for (const pn of profile_notes) verified.push({ item: 'Seu perfil', value: pn, source: 'Painel ELO (só neste navegador)' });
-    return { level, preliminary, theme, profile_notes, regions: jobRegions(n), lang, lang_name: LANG_NAME[lang], abroad: c.abroad, score, indicators: alerts, verified, insufficient, justification, rules_version: RULES_VERSION, content_hash: contentHash(text), salary };
+    return { level, preliminary, theme, profile_notes, community_notes, regions: jobRegions(n), lang, lang_name: LANG_NAME[lang], abroad: c.abroad, score, indicators: alerts, verified, insufficient, justification, rules_version: RULES_VERSION, content_hash: contentHash(text), salary };
   }
  
   // ------------------------------------------------------------------ perfil (área de interesse e região)

@@ -54,7 +54,7 @@
 
   /* hero */
   .hero{padding:64px 0 48px;background:radial-gradient(1200px 400px at 80% -10%,var(--red-bg),transparent 60%)}
-  .hero .wrap{display:grid;grid-template-columns:1.2fr .8fr;gap:48px;align-items:center}
+  .hero .wrap{display:grid;grid-template-columns:1fr 1.1fr;gap:40px;align-items:center}
   @media (max-width:880px){.hero .wrap{grid-template-columns:1fr}}
   .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--red);background:var(--red-bg);padding:6px 12px;border-radius:999px}
   h1{font-size:clamp(34px,6vw,56px);line-height:1.05;letter-spacing:-.03em;margin:18px 0 16px;text-wrap:balance}
@@ -172,9 +172,19 @@
   .sent{white-space:pre-wrap;font:12.5px/1.5 ui-monospace,Menlo,Consolas,monospace;background:var(--bg-soft);border:1px solid var(--line);border-radius:12px;padding:12px;max-height:340px;overflow:auto;margin:0}
   .res{margin-top:14px} .res .ok{color:var(--green);font-weight:700} .res .err{color:var(--red);font-weight:700}
   .res a{display:block;margin-top:6px}
+
+  /* aviso no topo, imagem da extensão e telas */
+  .topnote{padding-top:20px} .topnote .disclaimer{margin-top:0}
+  .shot{margin:0;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+  .shot img{width:100%;height:auto;display:block;background:var(--gray-bg)}
+  .shot figcaption{padding:12px 14px;font-size:14px;color:var(--muted)} .shot figcaption b{display:block;color:var(--ink);font-size:15px}
+  .hero-shot{justify-self:center;width:100%}
+  .shots{display:grid;grid-template-columns:repeat(2,1fr);gap:20px} .shots .shot:first-child{grid-column:1/-1}
+  @media (max-width:720px){.shots{grid-template-columns:1fr}}
+  .qrwrap{display:flex;justify-content:center;margin-top:32px}
 </style>
 </head>
-<body>
+<body data-elo-ignore>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="i-money" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.6-1.5-3-1.5-1.7 0-3 .8-3 2s1.3 1.7 3 2 3 .8 3 2-1.3 2-3 2c-1.4 0-2.5-.5-3-1.5M12 6v2m0 8v2"/></symbol>
@@ -201,13 +211,16 @@
 <header class="top">
   <div class="wrap">
     <a class="brand" href="#"><img src="icon.png" alt="" width="30" height="30">ELO</a>
-    <nav aria-label="Seções"><a href="#como">Como funciona</a><a href="#sinais">O que detecta</a><a href="#instalar">Instalar</a><a href="#alertas">Alertas</a><a href="#ajuda">Pedir ajuda</a></nav>
+    <nav aria-label="Seções"><a href="#como">Como funciona</a><a href="#telas">Telas</a><a href="#sinais">O que detecta</a><a href="#instalar">Instalar</a><a href="#alertas">Alertas</a><a href="#ajuda">Pedir ajuda</a></nav>
     <a class="btn sm" href="#instalar">Baixar grátis</a>
   </div>
 </header>
 
 <main>
-  <section class="hero" style="padding-top:64px">
+  <div class="wrap topnote">
+    <div class="disclaimer" role="note"><svg class="ic"><use href="#i-alert"/></svg><p><b>O ELO aponta sinais, não acusa empresas.</b> Um alerta indica que a oferta precisa ser verificada antes de você enviar documentos, pagar qualquer valor ou viajar. Mesmo que você aceite, o consentimento obtido por engano não vale (Protocolo de Palermo).</p></div>
+  </div>
+  <section class="hero" style="padding-top:32px">
     <div class="wrap">
       <div>
         <span class="eyebrow"><svg class="ic" style="width:16px;height:16px"><use href="#i-shield"/></svg>Extensão gratuita para Chrome</span>
@@ -219,13 +232,10 @@
         </div>
         <p class="small">Grátis · sem cadastro · a leitura acontece no seu navegador</p>
       </div>
-      <aside class="qrcard" aria-labelledby="qr-t">
-        <h2 id="qr-t">Compartilhe o ELO</h2>
-        <p>Aponte a câmera do celular para abrir esta página.</p>
-        <div id="qr" role="img" aria-label="QR code com o endereço desta página"></div>
-        <div class="qrurl" id="qrurl"></div>
-        <button class="btn sm ghost" id="dlqr" type="button"><svg class="ic" style="width:16px;height:16px"><use href="#i-download"/></svg>Baixar QR (PNG) para imprimir</button>
-      </aside>
+      <figure class="shot hero-shot">
+        <img src="telas/imagem-redepro.webp" width="1280" height="720" alt="Extensão ELO numa rede profissional: o botão Verificar imagem leu o panfleto de uma vaga na Tailândia e o painel mostra Alto risco, com o padrão de aliciamento para centros de golpes" fetchpriority="high">
+        <figcaption>O ELO leu o panfleto de um post e encontrou o padrão de aliciamento para centros de golpes.</figcaption>
+      </figure>
     </div>
   </section>
 
@@ -237,6 +247,19 @@
         <div class="step"><div class="n">2</div><h3>Veja o selo</h3><p><b style="color:var(--red)">Alto risco</b>, <b style="color:var(--amber)">Atenção</b> ou <b style="color:var(--green)">Sem alertas</b>, ao lado do anúncio, com o motivo principal escrito.</p></div>
         <div class="step"><div class="n">3</div><h3>Entenda e escolha</h3><p>Na aba <b>Alerta</b>, o que foi encontrado e por quê. Na aba <b>Vagas verdadeiras</b>, opções mais seguras e portais oficiais.</p></div>
         <div class="step"><div class="n">4</div><h3>Golpe em imagem? Verifique</h3><p>Passe o mouse no panfleto do post: o botão <b style="color:var(--red)">ELO · Verificar imagem</b> lê o texto da imagem e aplica as mesmas regras.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="telas">
+    <div class="wrap">
+      <div class="head"><div class="kicker">Telas</div><h2 class="t">Veja o ELO funcionando</h2><p>Capturas reais da extensão na <a id="demo-link3" href="demo/">demonstração</a> (empresas e vagas fictícias, com padrões reais documentados).</p></div>
+      <div class="shots">
+        <figure class="shot"><img src="telas/painel-vaga.webp" width="1280" height="720" loading="lazy" alt="Painel do ELO numa vaga no Camboja: alto risco, retenção de passaporte, trecho do anúncio e fundamento no Código Penal"><figcaption><b>Painel com os motivos</b> Trecho do anúncio, fundamento legal e botão Reportar.</figcaption></figure>
+        <figure class="shot"><img src="telas/imagem-post.webp" width="1280" height="720" loading="lazy" alt="Post num grupo com panfleto de vaga na Tailândia; o botão ELO no canto da imagem mostra Alto risco"><figcaption><b>Golpe em imagem</b> Passe o mouse no panfleto e clique em Verificar imagem.</figcaption></figure>
+        <figure class="shot"><img src="telas/buscador.webp" width="1280" height="720" loading="lazy" alt="Resultados de busca com selo do ELO: Atenção, análise preliminar de uma vaga em Bangkok"><figcaption><b>No buscador</b> Análise preliminar com título e resumo, antes de abrir.</figcaption></figure>
+        <figure class="shot"><img src="telas/feed.webp" width="1280" height="720" loading="lazy" alt="Feed de rede social com selos do ELO só nos posts de oferta com sinais de risco"><figcaption><b>No feed</b> O selo aparece só nas ofertas com sinais de risco.</figcaption></figure>
+        <figure class="shot"><img src="telas/painel-extensao.webp" width="1280" height="720" loading="lazy" alt="Painel da extensão ELO com área de interesse e região"><figcaption><b>Seu perfil</b> Área de interesse e região para avisos personalizados.</figcaption></figure>
       </div>
     </div>
   </section>
@@ -324,6 +347,15 @@
           <p style="margin:16px 0 0"><a href="https://github.com/alexlucerofer/TRTVR">Ver o código no GitHub</a></p>
         </div>
       </div>
+      <div class="qrwrap">
+        <aside class="qrcard" aria-labelledby="qr-t">
+          <h2 id="qr-t">Compartilhe o ELO</h2>
+          <p>Aponte a câmera do celular para abrir esta página.</p>
+          <div id="qr" role="img" aria-label="QR code com o endereço desta página"></div>
+          <div class="qrurl" id="qrurl"></div>
+          <button class="btn sm ghost" id="dlqr" type="button"><svg class="ic" style="width:16px;height:16px"><use href="#i-download"/></svg>Baixar QR (PNG) para imprimir</button>
+        </aside>
+      </div>
     </div>
   </section>
 
@@ -368,14 +400,13 @@
         <a class="hcard" href="https://ipe.sit.trabalho.gov.br" target="_blank" rel="noopener"><span class="num" style="font-size:20px">Ipê</span><div><b>Sistema Ipê (MTE)</b><span>Denúncia de trabalho análogo ao de escravo. Pode ser anônima.</span></div></a>
         <a class="hcard" href="https://www.gov.br/mre/pt-br/assuntos/portal-consular" target="_blank" rel="noopener"><span class="num" style="font-size:20px"><svg class="ic" style="width:30px;height:30px"><use href="#i-globe"/></svg></span><div><b>Itamaraty — Portal Consular</b><span>Brasileiros no exterior: plantão das embaixadas e consulados.</span></div></a>
       </div>
-      <div class="disclaimer"><svg class="ic"><use href="#i-alert"/></svg><p><b>O ELO aponta sinais, não acusa empresas.</b> Um alerta indica que a oferta precisa ser verificada antes de você enviar documentos, pagar qualquer valor ou viajar. Mesmo que você aceite, o consentimento obtido por engano não vale (Protocolo de Palermo).</p></div>
     </div>
   </section>
 </main>
 
 <footer>
   <div class="wrap">
-    <span>ELO — Vagas seguras · v0.3.0 · prevenção ao tráfico de pessoas e ao trabalho escravo</span>
+    <span>ELO — Vagas seguras · v0.3.1 · prevenção ao tráfico de pessoas e ao trabalho escravo</span>
     <a id="demo-link" href="demo/">Ver a demonstração (vagas fictícias, Mural e RedePro)</a>
     <button class="theme" id="theme" type="button">Alternar tema</button>
   </div>
@@ -481,6 +512,6 @@
   };
 })();
 </script>
-<script>(() => { if (location.pathname.startsWith('/lp')) for (const id of ['demo-link', 'demo-link2']) document.getElementById(id).href = '/demo/'; })();</script>
+<script>(() => { if (location.pathname.startsWith('/lp')) for (const id of ['demo-link', 'demo-link2', 'demo-link3']) document.getElementById(id).href = '/demo/'; })();</script>
 </body>
 </html>

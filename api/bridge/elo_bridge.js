@@ -25,6 +25,10 @@ async function handle(msg) {
     return { rules_version: R.RULES_VERSION, legal: R.LEGAL,
       indicators: R.INDICATORS.map(({ id, title, description, severity, basis }) => ({ id, title, description, severity, basis })) };
   }
+  // base de anúncios reportados (a API envia a lista ao iniciar e cada relato novo)
+  if (msg.action === 'reported_set') { db._reported = (msg.items || []).slice(-5000); return { count: db._reported.length }; }
+  if (msg.action === 'reported_add') { db._reported.push(msg.item); if (db._reported.length > 5000) db._reported.shift(); return { count: db._reported.length }; }
+  if (msg.action === 'contacts') return { keys: Core.contactKeys(msg.text || '') };
   if (msg.action === 'analyze') {
     const r = await Core.runAnalysis({ job: msg.job, profile: msg.profile || null }, { db, http, external, now: () => new Date() });
     delete r.legal; // a API devolve a base legal em /v1/indicadores

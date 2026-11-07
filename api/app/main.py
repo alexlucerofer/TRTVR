@@ -25,7 +25,7 @@ from .limits import RateLimiter
 from .rules_bridge import RulesBridge, RulesError
 from .store import Store
 
-VERSION = "0.3.0"
+VERSION = "0.3.1"
 AREAS = Literal["atendimento", "ti", "marketing_digital", "agro", "construcao", "hotelaria", "domestico", "beleza_entretenimento", "outra"]
 REGIOES = Literal["brasil", "america_do_sul", "europa", "america_do_norte", "oriente_medio", "sudeste_asiatico", "asia_leste"]
 NIVEIS = Literal["alto_risco", "atencao", "dados_insuficientes", "sem_alertas"]
@@ -187,6 +187,49 @@ def analisar_imagem_base64(pedido: PedidoImagemBase64):
     return _analyze_image(data, pedido.texto, pedido.url, _profile(pedido.perfil))
 
 
+# ---------------------------------------------------------------- relatos (alimentam a base de comparação)
+CATEGORIAS = Literal["inconsistencia", "cobranca", "documentos", "pressao", "outro"]
+
+
+class Relato(BaseModel):
+    """Relato de anúncio suspeito, enviado pelo botão "Reportar" da extensão (ou por qualquer cliente)."""
+    categoria: CATEGORIAS = "inconsistencia"
+    texto: str | None = Field(default=None, max_length=2000, description="O que a pessoa percebeu (sem dados pessoais)")
+    job: Vaga
+    nivel: NIVEIS | None = None
+    indicadores: list[str] = Field(default_factory=list, max_length=30)
+    imagem_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+
+
+def _reported_item(r: dict) -> dict:
+    j = r["job"]
+    return {"id": r["id"], "title": j.get("title"), "company": j.get("company"), "description": j.get("description") or "", "url": j.get("url"),
+            "created_at": r["criado_em"], "status": r["status"], "category": r["categoria"]}
+
+
+def _reported_snapshot():
+    # base de comparação: tudo que não foi rejeitado pela moderação
+    return [("reported_set", {"items": [_reported_item(r) for r in reversed(store.reports(limit=5000)) if r["status"] != "rejeitado"]})]
+
+
+bridge.on_start = _reported_snapshot
+
+
+@app.post("/v1/relatos", tags=["público"], summary="Reporta um anúncio suspeito e o adiciona à base de comparação", dependencies=[Depends(limiter)])
+def reportar(rel: Relato):
+    job = rel.job.model_dump()
+    if not (job.get("url") or "").startswith(("http://", "https://")):
+        job["url"] = None
+    contatos = bridge.call("contacts", text=" ".join(filter(None, [job.get("title"), job.get("description")])))["keys"]
+    # quantos relatos anteriores batem com este (texto parecido ou mesmo contato), antes de adicioná-lo
+    similares = _analyze({**job, "url": job.get("url") or "https://elo-api.local/relato"}, None).get("community_notes", [])
+    r = store.report(categoria=rel.categoria, texto=(rel.texto or "").strip() or None, job=job, nivel=rel.nivel,
+                     indicadores=[i[:60] for i in rel.indicadores], imagem_sha256=rel.imagem_sha256, contatos=contatos)
+    bridge.call("reported_add", item=_reported_item(r))
+    return {"id": r["id"], "status": r["status"], "contatos": contatos, "parecidos_ja_reportados": similares,
+            "message": f"Relato nº {r['id']} adicionado à base ELO. Anúncios parecidos ou com o mesmo contato passam a mostrar este relato."}
+
+
 # ---------------------------------------------------------------- inscrição em alertas (landing page)
 class Localizacao(BaseModel):
     lat: float = Field(ge=-90, le=90)
@@ -254,6 +297,25 @@ def inscrever(i: Inscricao):
 
 
 # ---------------------------------------------------------------- gestão (chave de administrador)
+class Moderacao(BaseModel):
+    status: Literal["pendente", "aprovado", "rejeitado"]
+
+
+@app.get("/v1/gestao/relatos", tags=["gestão"], dependencies=[Depends(require_admin)])
+def listar_relatos(status: Literal["pendente", "aprovado", "rejeitado"] | None = None, limit: int = 200):
+    return {"itens": store.reports(status, limit)}
+
+
+@app.patch("/v1/gestao/relatos/{relato_id}", tags=["gestão"], summary="Modera um relato (rejeitado sai da base de comparação)", dependencies=[Depends(require_admin)])
+def moderar_relato(relato_id: int, m: Moderacao):
+    if not store.get_report(relato_id):
+        raise HTTPException(status_code=404, detail="relato não encontrado")
+    store.set_report_status(relato_id, m.status)
+    for a, p in _reported_snapshot():
+        bridge.call(a, **p)
+    return store.get_report(relato_id)
+
+
 @app.get("/v1/gestao/inscricoes", tags=["gestão"], dependencies=[Depends(require_admin)])
 def listar_inscricoes(limit: int = 200):
     return {"itens": store.subscriptions(limit)}

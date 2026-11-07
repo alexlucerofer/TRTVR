@@ -43,7 +43,7 @@ async function waitApi() { for (let i = 0; i < 60; i++) { try { const r = await 
   check(/Embaixada do Brasil em Bangkok/.test(panel), 'painel mostra canal oficial na Tailândia');
   check(/Modo local/.test(panel), 'painel informa modo local (sem Supabase configurado)');
   await page.evaluate(() => { const s = document.querySelector('elo-panel').shadowRoot; s.querySelector('textarea').value = 'Pediram taxa por Pix para o visto.'; s.querySelector('.send').click(); });
-  await page.waitForFunction(() => /Modo local|registrado/.test(document.querySelector('elo-panel').shadowRoot.querySelector('.msg').textContent));
+  await page.waitForFunction(() => /Modo local|registrado|base ELO/.test(document.querySelector('elo-panel').shadowRoot.querySelector('.msg').textContent));
   check(true, 'relato enviado (modo local)');
   await page.screenshot({ path: path.join(root, 'tests/screens/vagas-painel.png') });
 

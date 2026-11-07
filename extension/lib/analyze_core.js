@@ -87,6 +87,15 @@
       .map((r) => ({ company: r.company_name, url: r.url, seen_at: r.first_seen_at, similarity: R.similarity(text, [r.title, r.description].join(' ')) }))
       .filter((s) => s.similarity >= 0.6).sort((a, b) => b.similarity - a.similarity).slice(0, 5);
     if (input.local_history) facts.local_history = input.local_history;
+    // base de anúncios REPORTADOS por usuários (API ELO): texto parecido ou mesmo contato → nota (não muda o nível sozinho)
+    if (deps.db.reportedJobs) {
+      const mine = contactKeys(job.description + ' ' + (job.title || ''));
+      facts.reported_similar = (await deps.db.reportedJobs()).filter((r) => r.url !== job.url).map((r) => {
+        const theirs = contactKeys([r.title, r.description].join(' '));
+        return { id: r.id, title: r.title, company: r.company, seen_at: r.created_at, status: r.status, category: r.category,
+          similarity: R.similarity(text, [r.title, r.description].join(' ')), shared: mine.filter((k) => theirs.includes(k)) };
+      }).filter((r) => r.similarity >= 0.55 || r.shared.length).sort((a, b) => b.shared.length - a.shared.length || b.similarity - a.similarity).slice(0, 3);
+    }
     if (input.profile && typeof input.profile === 'object') facts.profile = sanitizeProfile(input.profile);
 
     // 4) regras
@@ -111,6 +120,14 @@
       .sort((a, b) => countries.indexOf(a.country) - countries.indexOf(b.country));
 
     return { ...a, job_id: saved.job_id, analysis_id: saved.analysis_id, stored_at: saved.created_at, facts_used: Object.keys(facts), alternatives, support, legal: R.LEGAL };
+  }
+
+  // contatos comparáveis entre anúncios: telefones, e-mails e @usuário de Telegram
+  function contactKeys(text) {
+    const R = root.ELORules;
+    const c = R.extractContacts(text || '');
+    const tg = (String(text || '').toLowerCase().match(/@[a-z0-9_]{4,32}/g) || []).filter((h) => !/@(gmail|hotmail|outlook|yahoo)/.test(h));
+    return [...new Set([...c.phones.map((p) => 'tel:' + p), ...c.emails.map((e) => 'mail:' + e.toLowerCase()), ...tg.map((h) => 'tg:' + h)])];
   }
 
   // perfil vindo do painel: só listas curtas de códigos conhecidos (nada de texto livre)
@@ -138,7 +155,8 @@
     const analyses = []; const reports = [];
     const R = root.ELORules;
     return {
-      _jobs: jobs, _analyses: analyses, _reports: reports,
+      _jobs: jobs, _analyses: analyses, _reports: reports, _reported: [],
+      async reportedJobs() { return this._reported; },
       async findCompanyByDomain(d) { return companies.find((c) => c.domain && c.domain.toLowerCase() === d.toLowerCase()) || null; },
       async findCompanyByName(nm) { return companies.find((c) => R.norm(c.name) === R.norm(nm)) || null; },
       async findRegistry(nm, doc) { return (seed.employerRegistry || []).filter((e) => (nm && R.norm(e.employer_name) === R.norm(nm)) || (doc && e.document && e.document.replace(/\D/g, '') === doc)); },
@@ -156,7 +174,7 @@
     };
   }
 
-  const api = { runAnalysis, sanitizeProfile, validateJob, validateReport, companyDomain, memoryDb };
+  const api = { runAnalysis, contactKeys, sanitizeProfile, validateJob, validateReport, companyDomain, memoryDb };
   root.ELOCore = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

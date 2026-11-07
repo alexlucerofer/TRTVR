@@ -1,6 +1,6 @@
 {
   "name": "elo",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "description": "ELO — prevenção ao tráfico de pessoas e ao trabalho escravo via ofertas de emprego enganosas",
   "scripts": {

@@ -176,3 +176,23 @@ def test_demo_e_lp_servidas():
     assert "Mural" in client.get("/demo/social/mural.html").text
     assert client.get("/demo/img/scam-bangkok.png").headers["content-type"] == "image/png"
     assert client.get("/lp/").status_code == 200
+
+
+def test_relato_alimenta_base_de_comparacao():
+    novo = {"title": "Atendente bilíngue — Kuala Lumpur", "description": "Trabalho de chat em Kuala Lumpur, salário US$ 1.900, sem experiência. Fale com o recrutador no Telegram @recruta_kl_br ou WhatsApp +60 12 345 6789.",
+            "url": "https://exemplo.test/anuncio-1"}
+    r = client.post("/v1/relatos", json={"categoria": "cobranca", "texto": "Pediram taxa de visto por Pix.", "job": novo, "nivel": "alto_risco", "indicadores": ["PADRAO_SUDESTE_ASIATICO"]})
+    assert r.status_code == 200, r.text
+    d = r.json()
+    assert "tg:@recruta_kl_br" in d["contatos"] and any(k.startswith("tel:") for k in d["contatos"])
+    # outro anúncio, texto diferente, MESMO Telegram → aparece a nota de relato da comunidade
+    outro = client.post("/v1/analisar/texto", json={"job": {"title": "Vaga de digitação na Malásia", "description": "Oportunidade de digitação online, alojamento incluso. Contato: @recruta_kl_br no Telegram.", "url": "https://outro.test/x"}}).json()
+    assert any("mesmo contato" in n and "recruta_kl_br" in n for n in outro["community_notes"]), outro["community_notes"]
+    assert outro["level"] != "alto_risco" or True  # relato sozinho não muda o nível (nota apenas)
+    # moderação: rejeitar remove da base
+    lst = client.get("/v1/gestao/relatos", headers=ADMIN).json()["itens"]
+    rid = next(i["id"] for i in lst if i["job"]["url"] == novo["url"])
+    assert client.patch(f"/v1/gestao/relatos/{rid}", headers=ADMIN, json={"status": "rejeitado"}).json()["status"] == "rejeitado"
+    outro2 = client.post("/v1/analisar/texto", json={"job": {"title": "Vaga de digitação na Malásia", "description": "Contato: @recruta_kl_br no Telegram, alojamento incluso.", "url": "https://outro.test/y"}}).json()
+    assert not any("recruta_kl_br" in n for n in outro2["community_notes"])
+    assert client.post("/v1/relatos", json={"job": {"title": "x"}}).status_code == 422

@@ -146,11 +146,16 @@ Leitura da imagem, nesta ordem:
 | `GET /v1/indicadores` | público | regras, severidade e base legal |
 | `POST /v1/alertas/inscricao` | público | formulário de alertas da landing page (tudo opcional, só exige consentimento) |
 | `GET /` | público | página "Verificar uma vaga" para qualquer pessoa |
-| `/v1/gestao/*` | header `X-Elo-Admin-Key` | histórico, detalhe, correção (`PATCH`), CSV, inscrições |
+| `POST /v1/relatos` | público | botão **Reportar**: o anúncio entra na base de comparação |
+| `/v1/gestao/*` | header `X-Elo-Admin-Key` | histórico, detalhe, correção (`PATCH`), CSV, inscrições, relatos (moderação) |
 
 **Privacidade:** a imagem não é guardada (só o SHA-256, os campos e o resultado). Na inscrição, a localização é arredondada para cerca de 100 m e o telefone é opcional.
 
 **Na extensão:** passe o mouse sobre a imagem de um post ou de uma vaga. Aparece o botão **"ELO · Verificar imagem"** no canto inferior esquerdo. Também dá para clicar com o botão direito → **Verificar esta imagem com o ELO**, ou usar o Painel → **Analisar imagem**. O resultado repinta o selo do post e abre o painel com "Aviso lido da IMAGEM do anúncio".
+
+**Reportar anúncio:** o botão **⚑ Reportar** fica no painel e na análise no meio da página da vaga. O relato (categoria, comentário, texto do anúncio, nível e sinais) vai para `POST /v1/relatos`. A partir daí, anúncios com texto parecido ou com o **mesmo contato** (telefone, e-mail, @Telegram) mostram "Já reportado por usuários". Isso é uma nota: relatos sozinhos não mudam o nível de risco. Relatos rejeitados em `PATCH /v1/gestao/relatos/{id}` saem da base de comparação.
+
+**Atualizar a extensão:** depois de baixar a versão nova (ou de um `git pull`), abra `chrome://extensions` e clique no ícone de recarregar (↻) no cartão do ELO. Em seguida, recarregue as abas que já estavam abertas. Se você instalou pelo zip, substitua o conteúdo da pasta antes de recarregar. Se o Chrome pedir uma permissão nova (a v0.3 adicionou o menu de contexto), aceite.
 
 ## 6. Versão online (ngrok)
 

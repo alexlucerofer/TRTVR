@@ -26,6 +26,8 @@ class RulesBridge:
         self._proc: subprocess.Popen | None = None
         self._lock = threading.Lock()
         self._ids = itertools.count(1)
+        # chamado sempre que o processo Node (re)inicia: devolve [(ação, payload)] para repor o estado (ex.: base de relatos)
+        self.on_start = None
 
     def _start(self) -> subprocess.Popen:
         node = os.environ.get("ELO_NODE") or shutil.which("node")
@@ -40,27 +42,32 @@ class RulesBridge:
         with self._lock:
             if self._proc is None or self._proc.poll() is not None:
                 self._proc = self._start()
-            req_id = next(self._ids)
-            assert self._proc.stdin and self._proc.stdout
-            try:
-                self._proc.stdin.write(json.dumps({"id": req_id, "action": action, **payload}, ensure_ascii=False) + "\n")
-                self._proc.stdin.flush()
-                result: list[str] = []
-                reader = threading.Thread(target=lambda: result.append(self._proc.stdout.readline()), daemon=True)
-                reader.start()
-                reader.join(self.timeout)
-                if not result or not result[0]:
-                    raise RulesError("motor de regras não respondeu")
-                msg = json.loads(result[0])
-            except (BrokenPipeError, json.JSONDecodeError, RulesError) as e:
-                self.close()
-                raise RulesError(str(e) or "falha no motor de regras") from e
-            if msg.get("id") != req_id:
-                self.close()
-                raise RulesError("resposta fora de ordem do motor de regras")
-            if not msg.get("ok"):
-                raise RulesError(msg.get("error") or "erro no motor de regras")
-            return msg["result"]
+                for a, p in (self.on_start() if self.on_start else []):
+                    self._send(a, p)
+            return self._send(action, payload)
+
+    def _send(self, action: str, payload: dict) -> dict:
+        req_id = next(self._ids)
+        assert self._proc.stdin and self._proc.stdout
+        try:
+            self._proc.stdin.write(json.dumps({"id": req_id, "action": action, **payload}, ensure_ascii=False) + "\n")
+            self._proc.stdin.flush()
+            result: list[str] = []
+            reader = threading.Thread(target=lambda: result.append(self._proc.stdout.readline()), daemon=True)
+            reader.start()
+            reader.join(self.timeout)
+            if not result or not result[0]:
+                raise RulesError("motor de regras não respondeu")
+            msg = json.loads(result[0])
+        except (BrokenPipeError, json.JSONDecodeError, RulesError) as e:
+            self.close()
+            raise RulesError(str(e) or "falha no motor de regras") from e
+        if msg.get("id") != req_id:
+            self.close()
+            raise RulesError("resposta fora de ordem do motor de regras")
+        if not msg.get("ok"):
+            raise RulesError(msg.get("error") or "erro no motor de regras")
+        return msg["result"]
 
     def analyze(self, job: dict, profile: dict | None = None) -> dict:
         return self.call("analyze", job=job, profile=profile)

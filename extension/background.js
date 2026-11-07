@@ -93,16 +93,39 @@ async function runLocal(job, hist, reason, profile) {
   return { mode: 'local', mode_reason: reason, ...r };
 }
 
-async function sendReport(payload) {
+// Relato: vai para a API ELO (base de comparação: anúncios parecidos ou com o mesmo contato passam a mostrar o relato)
+// e, se configurado, também para o Supabase (moderação). O texto do anúncio é público; o relato não leva dados de quem relata.
+async function sendReport(payload, job, result) {
   const cfg = await getConfig();
-  self.ELOCore.validateReport(payload);
-  if (!cfg.url) return { ok: true, local: true, message: 'Modo local: relato guardado só neste navegador (Supabase não configurado).' };
-  const r = await fetch(cfg.url + '/functions/v1/report', {
-    method: 'POST', headers: { 'Content-Type': 'application/json', apikey: cfg.key, Authorization: 'Bearer ' + cfg.key }, body: JSON.stringify(payload),
-  });
-  const data = await r.json();
-  if (!r.ok) throw new Error(data.error || 'HTTP ' + r.status);
-  return data;
+  const v = self.ELOCore.validateReport(payload);
+  const out = [];
+  let apiOk = false;
+  if (job && job.title) {
+    const { apiUrl } = await getSettings();
+    try {
+      const r = await fetch(apiUrl + '/v1/relatos', { method: 'POST', headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1' }, body: JSON.stringify({
+        categoria: v.category, texto: v.body,
+        job: { title: String(job.title).slice(0, 300), description: (job.description || '').slice(0, 8000) || null, company: job.company || null, location: job.location || null, salary: job.salary || null, url: /^https?:/.test(job.url || '') ? job.url : null },
+        nivel: result && result.level || null, indicadores: (result && result.indicators || []).map((i) => i.id).slice(0, 30), imagem_sha256: result && result.image_sha256 || null }) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(typeof d.detail === 'string' ? d.detail : 'HTTP ' + r.status);
+      apiOk = true;
+      out.push(d.message + (d.parecidos_ja_reportados && d.parecidos_ja_reportados.length ? ' Já havia ' + d.parecidos_ja_reportados.length + ' relato(s) parecido(s).' : ''));
+    } catch (e) { out.push('API ELO indisponível (' + e.message + ').'); }
+  }
+  if (cfg.url) {
+    try {
+      const r = await fetch(cfg.url + '/functions/v1/report', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', apikey: cfg.key, Authorization: 'Bearer ' + cfg.key }, body: JSON.stringify(payload),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || 'HTTP ' + r.status);
+      out.push(data.message || 'Relato registrado no Supabase como pendente de moderação.');
+    } catch (e) { if (!apiOk) throw e; out.push('Supabase: ' + e.message); }
+  } else if (!apiOk) {
+    out.push('Modo local: relato guardado só neste navegador.');
+  }
+  return { ok: true, message: out.join(' ') };
 }
 
 // ---------- leitura de imagem pela API ELO (Claude Vision / Tesseract)
@@ -160,7 +183,7 @@ chrome.runtime.onMessage.addListener((msg, sender, reply) => {
       if (msg.type === 'analyze') return reply({ ok: true, result: await analyzeJob(msg.job, msg.opts) });
       if (msg.type === 'analyzeImage') return reply({ ok: true, result: await analyzeImage(msg) });
       if (msg.type === 'settings') { const s = await getSettings(); return reply({ ok: true, autoImage: s.autoImage, apiUrl: s.apiUrl }); }
-      if (msg.type === 'report') return reply({ ok: true, result: await sendReport(msg.payload) });
+      if (msg.type === 'report') return reply({ ok: true, result: await sendReport(msg.payload, msg.job, msg.result) });
       if (msg.type === 'status') { const c = await getConfig(); return reply({ ok: true, configured: !!(c.url && c.key), url: c.url }); }
       if (msg.type === 'clearHistory') { await chrome.storage.local.remove('history'); cache.clear(); return reply({ ok: true }); }
       reply({ ok: false, error: 'mensagem desconhecida' });
