@@ -1,52 +1,97 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Customer Support / Marketing Digital — Bangkok — RedePro</title><style>:root{--bg:#f3f4f6;--card:#fff;--ink:#111827;--muted:#6b7280;--line:#e5e7eb;--accent:#1a56db}
-*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-a{color:var(--accent)} .top{background:#fff;border-bottom:1px solid var(--line);padding:10px 16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:5}
-.brand{font-weight:800;font-size:20px;letter-spacing:-.02em;text-decoration:none;color:var(--ink)} .top nav{margin-left:auto;display:flex;gap:14px;font-size:14px}
-.warn{background:#fffbeb;color:#92400e;padding:7px 16px;font-size:12.5px;border-bottom:1px solid #fde68a}
-main{max-width:720px;margin:18px auto;padding:0 16px} .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
-h1{font-size:24px;line-height:1.25;margin:0 0 6px} h2{font-size:18px;margin:0 0 4px} .meta{color:var(--muted);font-size:13.5px}
-.btn{display:inline-block;background:#111827;color:#fff;border:0;border-radius:8px;padding:10px 16px;font:600 15px system-ui;cursor:pointer;text-decoration:none}
-.av{display:inline-grid;place-items:center;border-radius:50%;color:#fff;font-weight:700;flex:none}
-svg{display:block;width:100%;height:auto;border-radius:10px} dialog{border:0;border-radius:12px;max-width:480px;padding:20px} dialog::backdrop{background:rgba(17,24,39,.45)}
-img.flyer{display:block;width:100%;height:auto;border-radius:10px} .pattern{font-size:13px;color:var(--muted);border-top:1px solid var(--line);margin-top:16px;padding-top:10px}
-/* buscador */
-.sbar{display:flex;gap:8px;flex:1;max-width:560px} .sbar input{flex:1;padding:10px 16px;border:1px solid #d1d5db;border-radius:999px;font:inherit;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.tabs{display:flex;gap:18px;max-width:720px;margin:0 auto;padding:8px 16px 0;font-size:14px} .tabs button{border:0;background:none;padding:8px 2px;font:inherit;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent} .tabs button[aria-pressed=true]{color:var(--accent);border-color:var(--accent);font-weight:600}
-.count{max-width:720px;margin:6px auto 0;padding:0 16px;font-size:13px;color:var(--muted)}
-.result{margin:0 0 26px} .site{display:flex;gap:10px;align-items:center;font-size:13px} .site b{display:block;font-weight:500;color:var(--ink)} .result h3{font-size:19px;font-weight:500;margin:4px 0 2px;color:var(--accent)} .result a{text-decoration:none} .result a:hover h3{text-decoration:underline}
-.chips{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0} .chip{font-size:12px;background:#eef2ff;color:#3730a3;border-radius:999px;padding:2px 8px}
-/* rede social */
-.post{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:14px;overflow:hidden} .post .ph{display:flex;gap:10px;align-items:center;padding:12px 14px 6px} .post .ph b{display:block;font-size:15px} .post .tx{padding:4px 14px 10px;white-space:pre-line}
-.post svg{border-radius:0} .post .ft{display:flex;justify-content:space-between;padding:8px 14px;font-size:13px;color:var(--muted);border-top:1px solid var(--line)} .post .lk{display:block;padding:10px 14px;font-weight:600;text-decoration:none}
-.preview{display:block;margin:0 14px 12px;border:1px solid var(--line);border-radius:10px;overflow:hidden;text-decoration:none;color:var(--ink)} .preview div{padding:10px 12px} .preview small{color:var(--muted);text-transform:uppercase;font-size:11px}
-.compose{display:flex;gap:10px;align-items:center} .compose span.ph{flex:1;background:#f3f4f6;border-radius:999px;padding:10px 14px;color:var(--muted)}
-/* página da vaga */
-.job-head{display:flex;gap:12px;align-items:center;margin:14px 0} .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:12px 0} .facts div{background:#f9fafb;border-radius:8px;padding:8px 10px;font-size:13.5px} .facts b{display:block;font-size:12px;color:var(--muted);font-weight:500}body{background:#f3f2ef} .top{background:#fff} .top .brand{color:#0f766e} .layout{max-width:1040px;margin:18px auto;padding:0 16px;display:grid;grid-template-columns:230px minmax(0,1fr) 260px;gap:16px}
-@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)} .side{display:none}}
-.feed-shared{background:#fff;border:1px solid var(--line);border-radius:10px;margin-bottom:12px;overflow:hidden}
-.actor{display:flex;gap:10px;padding:12px 14px 4px} .actor b{display:block} .actor .meta{font-size:12.5px}
-.commentary{padding:6px 14px 10px;white-space:pre-line} .feed-shared img.flyer{border-radius:0}
-.job-card{display:block;margin:0 14px 12px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;text-decoration:none;color:var(--ink)} .job-card small{color:var(--muted)}
-.social-counts{padding:8px 14px;font-size:12.5px;color:var(--muted);border-top:1px solid var(--line)}
-.top-card h1{font-size:24px} .pill{display:inline-block;background:#e7f3ef;color:#0f5132;border-radius:999px;padding:2px 10px;font-size:12.5px;margin-right:6px}
-.btn.pro{background:#0f766e;border-radius:999px} .recruiter{display:flex;gap:10px;align-items:center}</style></head><body data-elo-social="redepro">
-<div class="top"><a class="brand" href="redepro.html">▣ RedePro</a><span class="meta">rede profissional fictícia</span><nav><a href="../index.html">Início</a><a href="../busca.html">Procura</a><a href="../feed.html">Conecta</a><a href="../social/mural.html">Mural</a><a href="../social/redepro.html">RedePro</a><a href="../vagas.html">VagasJá</a></nav></div><div class="warn">Simulação para demonstrar o ELO. Marcas, empresas e vagas são FICTÍCIAS; os textos seguem padrões reais documentados (OIT, ONU, Itamaraty, Polícia Federal). Links de notícias, portais e canais oficiais são REAIS.</div>
-<div class="layout"><aside class="side"><div class="card"><span class="av" style="width:56px;height:56px;background:#ca8a04;font-size:22.400000000000002px">VU</span><p><b>Você Usuário</b></p><p class="meta">Procurando oportunidades</p></div></aside>
-  <main style="margin:0;padding:0;max-width:none"><article class="card top-card">
-    <div class="recruiter"><span class="av" style="width:48px;height:48px;background:#7c3aed;font-size:19.200000000000003px">LD</span><div><b>Lotus Digital Solutions (fictícia)</b><div class="meta">Empresa · 2–10 funcionários · página criada em out. 2026</div></div></div>
-    <h1 style="margin-top:12px">Customer Support / Marketing Digital — Bangkok</h1>
-    <div class="meta">Bangkok, Tailândia · há 4 dias · Mais de 100 candidaturas</div>
-    <p style="margin:10px 0"><span class="pill">Presencial</span><span class="pill">Tempo integral</span><span class="pill">Nível de entrada</span></p>
-    <button class="btn pro" type="button" onclick="document.getElementById('apply').showModal()">Candidatura simplificada</button>
-    <h2 style="margin-top:18px">Sobre a vaga</h2>
-    <p>Oportunidade internacional para brasileiros! Benefícios competitivos e processo rápido. Todos os detalhes estão no panfleto da vaga.</p>
-    <img class="flyer" src="../img/scam-bangkok.png" width="720" height="960" alt="Pode ser uma imagem de texto" loading="eager" data-elo-flyer>
-    <div data-elo-inline></div>
-    <h2 style="margin-top:18px">Conheça quem está recrutando</h2>
-    <div class="recruiter"><span class="av" style="width:40px;height:40px;background:#0891b2;font-size:16px">AL</span><div><b>Ana Lima (perfil fictício)</b><div class="meta">Talent Acquisition · perfil criado há 2 semanas · 3 conexões</div></div></div>
-    <div class="pattern"><b>Sobre este exemplo:</b> Padrão de scam center (Itamaraty 2026, ONU/ACNUDH 2023, FBI): o texto não diz quase nada e as condições ficam num PANFLETO: salário em dólar, sem experiência, teste de digitação, 18–35 anos, visto de turista, transfer até a fronteira (Mae Sot), Telegram e sigilo. Use &quot;Analisar imagem&quot; do ELO.</div>
-  </article></main>
-  <aside class="side"><div class="card"><b>Dica</b><p class="sp">Empresas reais têm site, CNPJ/registro e recrutadores com histórico.</p></div></aside>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Customer Support / Marketing Digital — Bangkok | Lotus Digital Solutions | RedePro</title><style>*{box-sizing:border-box} html{-webkit-text-size-adjust:100%} body{margin:0;font:15px/1.34 "Segoe UI Historic","Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;padding-bottom:40px}
+a{color:inherit;text-decoration:none} button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+.av{display:inline-grid;place-items:center;border-radius:50%;color:#fff;font-weight:700;flex:none;letter-spacing:.02em} .av.sq{border-radius:6px}
+.i{display:block;flex:none} img.flyer{display:block;width:100%;height:auto;border-radius:0}
+.sim{position:fixed;left:0;right:0;bottom:0;z-index:50;background:#111827;color:#e5e7eb;font-size:12px;padding:7px 14px;text-align:center} .sim a{color:#93c5fd;text-decoration:underline} .sim b{color:#fff}
+.rx{display:inline-flex;vertical-align:middle} .re{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;font-size:11px;margin-left:-4px;border:2px solid #fff;position:relative;background:#fff} .re:first-child{margin-left:0}
+:root{--p-bg:#f4f2ee;--p-card:#fff;--p-ink:rgba(0,0,0,.9);--p-sub:rgba(0,0,0,.6);--p-line:#e8e8e8;--p-brand:#0b7a6e;--p-brand-dark:#075e55;--p-hover:rgba(0,0,0,.08)}
+body{background:var(--p-bg);color:var(--p-ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:14px}
+.ptop{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--p-line);height:52px}
+.ptop .in{max-width:1128px;margin:0 auto;padding:0 16px;height:100%;display:flex;align-items:center;gap:8px}
+.plogo{width:34px;height:34px;border-radius:5px;background:var(--p-brand);color:#fff;display:grid;place-items:center;font:800 17px/1 system-ui;letter-spacing:-1px}
+.psearch{display:flex;align-items:center;gap:8px;background:#edf3f8;border-radius:4px;height:34px;padding:0 10px;width:280px;color:var(--p-sub)}
+.pnav{margin-left:auto;display:flex;height:100%} .pnav a{min-width:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--p-sub);font-size:12px;border-bottom:2px solid transparent;position:relative}
+.pnav a:hover{color:var(--p-ink)} .pnav a.on{color:var(--p-ink);border-bottom-color:var(--p-ink)} .pnav .badge{position:absolute;top:4px;left:50%;margin-left:4px;background:#cb112d;color:#fff;font:700 11px/1;border-radius:999px;padding:2px 5px}
+.pnav .sep{border-left:1px solid var(--p-line);margin:0 6px}
+.play{max-width:1128px;margin:24px auto 0;padding:0 16px;display:grid;grid-template-columns:225px minmax(0,1fr) 300px;gap:24px;align-items:start}
+.pc{background:var(--p-card);border-radius:8px;box-shadow:0 0 0 1px rgba(140,140,140,.2)}
+.prof{overflow:hidden;text-align:center} .prof .cover{height:56px;background:linear-gradient(120deg,#a7d7c5,#5c8d89 60%,#2f5d62)} .prof .av{margin:-36px auto 0;border:2px solid #fff;display:grid}
+.prof h3{margin:12px 0 2px;font-size:16px} .prof .hl{color:var(--p-sub);font-size:12px;padding:0 12px 12px} .prof .st{border-top:1px solid var(--p-line);padding:12px;text-align:left;font-size:12px;color:var(--p-sub);display:flex;justify-content:space-between} .prof .st b{color:var(--p-brand)}
+.prof .sv{border-top:1px solid var(--p-line);padding:12px;text-align:left;font-size:12px;font-weight:600;display:flex;gap:8px;align-items:center}
+.startp{padding:12px 16px 4px} .startp .row{display:flex;gap:8px;align-items:center} .startp .pill{flex:1;border:1px solid #8c8c8c;border-radius:35px;padding:12px 16px;color:var(--p-sub);font-weight:600}
+.startp .acts{display:flex;justify-content:space-around;padding:4px 0} .startp .acts span{display:flex;gap:8px;align-items:center;padding:12px 8px;border-radius:4px;color:var(--p-sub);font-weight:600}
+.sortby{display:flex;align-items:center;gap:8px;margin:8px 0;color:var(--p-sub);font-size:12px} .sortby hr{flex:1;border:0;border-top:1px solid #c9c9c9}
+.fs{margin-bottom:8px} .fs .ctx{padding:8px 16px;border-bottom:1px solid var(--p-line);color:var(--p-sub);font-size:12px}
+.actor{display:flex;gap:8px;padding:12px 16px 0;align-items:flex-start} .actor .who{flex:1;min-width:0} .actor .who b{font-size:14px;font-weight:600} .actor .deg{color:var(--p-sub);font-weight:400}
+.actor .hl{color:var(--p-sub);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .actor .tm{color:var(--p-sub);font-size:12px;display:flex;gap:4px;align-items:center}
+.follow{color:var(--p-brand);font-weight:600;display:flex;gap:4px;align-items:center;padding:4px 8px;border-radius:4px} .follow:hover{background:#e6f2f0}
+.commentary{padding:8px 16px 8px;white-space:pre-line;font-size:14px;line-height:1.43} .commentary .tag{color:var(--p-brand);font-weight:600} .commentary .more{color:var(--p-sub)}
+.fs .imgw{background:#f3f2ef} .fs .imgw img{max-height:700px;object-fit:contain}
+.jobcard{display:flex;gap:12px;align-items:center;background:#eef3f8;padding:12px 16px;border-top:1px solid var(--p-line)} .jobcard b{display:block;font-size:14px} .jobcard small{color:var(--p-sub);display:block} .jobcard .btn{margin-left:auto;border:1px solid var(--p-brand);color:var(--p-brand);border-radius:999px;padding:5px 14px;font-weight:600;white-space:nowrap}
+.social{display:flex;justify-content:space-between;align-items:center;padding:8px 16px;color:var(--p-sub);font-size:12px} .social .rx .re{width:16px;height:16px;font-size:10px;border-width:1px}
+.acts4{display:flex;border-top:1px solid var(--p-line);margin:0 12px;padding:2px 0} .acts4 span{flex:1;display:flex;gap:6px;justify-content:center;align-items:center;padding:10px 4px;border-radius:4px;color:var(--p-sub);font-weight:600} .acts4 span:hover{background:var(--p-hover)}
+.news h2{font-size:16px;margin:0;padding:12px 16px 4px} .news ul{list-style:none;margin:0;padding:0 0 8px} .news li{padding:6px 16px 6px 28px;position:relative} .news li:before{content:"•";position:absolute;left:14px;color:var(--p-sub);font-size:18px;line-height:1}
+.news li b{display:block;font-size:14px} .news li small{color:var(--p-sub);font-size:12px} .promo{padding:12px 16px;text-align:center;color:var(--p-sub);font-size:12px}
+.foot{color:var(--p-sub);font-size:12px;text-align:center;padding:16px;line-height:1.8}
+/* página de vaga */
+.jlay{max-width:1128px;margin:24px auto 0;padding:0 16px;display:grid;grid-template-columns:400px minmax(0,1fr);gap:0;align-items:start}
+.jlist{background:#fff;border:1px solid var(--p-line);border-radius:8px 0 0 8px;overflow:hidden;position:sticky;top:68px;max-height:calc(100vh - 110px);overflow-y:auto}
+.jlist .hd{padding:14px 16px;border-bottom:1px solid var(--p-line)} .jlist .hd b{font-size:16px} .jlist .hd small{display:block;color:var(--p-sub)}
+.ji{display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid var(--p-line);border-left:3px solid transparent} .ji.on{background:#edf3f8;border-left-color:var(--p-brand)} .ji b{color:var(--p-brand);font-size:15px;display:block} .ji small{display:block;color:var(--p-sub)} .ji .pr{color:#01754f;font-size:12px;margin-top:4px}
+.jdet{background:#fff;border:1px solid var(--p-line);border-left:0;border-radius:0 8px 8px 0;padding:24px;min-width:0}
+.jdet .co{display:flex;gap:8px;align-items:center;font-size:14px} .jdet h1{font-size:24px;line-height:1.25;margin:10px 0 6px;font-weight:600}
+.jdet .sub{color:var(--p-sub);font-size:14px} .jdet .sub b{color:#01754f;font-weight:600}
+.jdet .ins{list-style:none;padding:0;margin:14px 0} .jdet .ins li{display:flex;gap:8px;align-items:center;margin:6px 0;color:var(--p-ink)} .jdet .ins .i{color:var(--p-sub)}
+.jdet .pillx{display:inline-block;background:#e6f2f0;color:#075e55;border-radius:4px;padding:2px 8px;font-size:12px;font-weight:600;margin-right:6px}
+.jbtns{display:flex;gap:8px;margin:16px 0 4px} .apply{background:var(--p-brand);color:#fff;border-radius:999px;padding:10px 20px;font-weight:600;font-size:16px;display:inline-flex;gap:8px;align-items:center} .apply:hover{background:var(--p-brand-dark)}
+.save{border:1px solid var(--p-brand);color:var(--p-brand);border-radius:999px;padding:10px 20px;font-weight:600;font-size:16px}
+.jsec{border-top:1px solid var(--p-line);margin-top:24px;padding-top:20px} .jsec h2{font-size:20px;margin:0 0 12px;font-weight:600}
+.hirer{display:flex;gap:12px;align-items:center;border:1px solid var(--p-line);border-radius:8px;padding:14px} .hirer small{display:block;color:var(--p-sub)} .hirer .msgb{margin-left:auto;border:1px solid #666;border-radius:999px;padding:5px 14px;font-weight:600;color:#444}
+.about{white-space:pre-line;line-height:1.5} .jdet .flyerw{max-width:520px;margin-top:12px;border:1px solid var(--p-line);border-radius:8px;overflow:hidden}
+.coabout{display:flex;gap:12px;align-items:center} .coabout small{display:block;color:var(--p-sub)}
+dialog{border:0;border-radius:8px;max-width:480px;padding:20px} dialog::backdrop{background:rgba(0,0,0,.5)} dialog .apply{border:0;cursor:pointer;font-size:15px}
+@media (max-width:1000px){.play{grid-template-columns:minmax(0,1fr) 300px} .play .left{display:none} .psearch{width:200px} .jlay{grid-template-columns:minmax(0,1fr)} .jlist{display:none} .jdet{border-left:1px solid var(--p-line);border-radius:8px}}
+@media (max-width:760px){.play{grid-template-columns:minmax(0,1fr);padding:0;margin-top:8px} .play .right{display:none} .pnav a{min-width:56px} .pnav a span.t,.psearch span,.pnav .sep{display:none} .psearch{width:auto} .pc{border-radius:0} .jlay{padding:0;margin-top:0} .jdet{border-radius:0;padding:16px}}</style></head><body data-elo-social="redepro"><header class="ptop"><div class="in">
+  <a class="plogo" href="redepro.html" aria-label="RedePro — início">rp</a>
+  <div class="psearch"><svg class="i" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Pesquisar</span></div>
+  <nav class="pnav" aria-label="Navegação">
+    <a href="redepro.html"><svg class="i" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8v10a1 1 0 01-1 1h-5v-7H9v7H4a1 1 0 01-1-1z"/></svg><span class="t">Início</span></a>
+    <a href="#"><svg class="i" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><path d="M12 8v4M12 12l-5 4.5M12 12l5 4.5"/></svg><span class="t">Minha rede</span></a>
+    <a class="on" href="redepro-vaga.html"><svg class="i" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2M3 13h18"/></svg><span class="t">Vagas</span></a>
+    <a href="#"><svg class="i" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16a1 1 0 011 1v11a1 1 0 01-1 1H8l-4 4V5a1 1 0 011-1z"/></svg><span class="badge">2</span><span class="t">Mensagens</span></a>
+    <a href="#"><svg class="i" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 16v-5a6 6 0 10-12 0v5l-2 2h16zM10 21h4"/></svg><span class="badge">5</span><span class="t">Notificações</span></a>
+    <a href="#"><span class="av" style="width:24px;height:24px;font-size:9px;background:#ca8a04">LR</span><span class="t">Eu ▾</span></a>
+    <span class="sep"></span>
+    <a href="#"><svg class="i" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span class="t">Para negócios ▾</span></a>
+  </nav></div></header>
+<div class="jlay">
+  <aside class="jlist" aria-label="Vagas recomendadas">
+    <div class="hd"><b>Principais vagas recomendadas para você</b><small>Com base no seu perfil e nas suas pesquisas · 7 resultados</small></div>
+    <a class="ji on" href="redepro-vaga.html"><span class="av sq" style="width:48px;height:48px;font-size:17px;background:#0891b2">LD</span><span><b>Customer Support / Marketing Digital — Bangkok</b><small>Lotus Digital Solutions (fictícia)</small><small>Bangkok, Tailândia (Presencial)</small><div class="pr">● Candidatura simplificada</div></span></a>
+    <a class="ji" href="../vaga/analista-atendimento.html"><span class="av sq" style="width:48px;height:48px;font-size:17px;background:#ca8a04">HS</span><span><b>Analista de Atendimento ao Cliente</b><small>Horizonte Serviços de Atendimento Ltda (fictícia)</small><small>São Paulo/SP — presencial</small></span></a><a class="ji" href="../vaga/operador-colheita.html"><span class="av sq" style="width:48px;height:48px;font-size:17px;background:#ca8a04">CA</span><span><b>Operador de Colheita Mecanizada (safra)</b><small>Cooperativa Agrícola Vale Verde (fictícia)</small><small>Rio Verde/GO</small></span></a><a class="ji" href="../vaga/auxiliar-servicos.html"><span class="av sq" style="width:48px;height:48px;font-size:17px;background:#ca8a04">E</span><span><b>Auxiliar de serviços gerais — vaga urgente</b><small>Empresa não informada</small><small>Local não informado</small></span></a><a class="ji" href="../vaga/atendente-bangkok.html"><span class="av sq" style="width:48px;height:48px;font-size:17px;background:#ea580c">GB</span><span><b>Atendente Bilíngue em Bangkok — US$ 2.500/mês</b><small>Golden Bridge International Group (fictícia)</small><small>Bangkok, Tailândia</small></span></a><a class="ji" href="../vaga/rocado-para.html"><span class="av sq" style="width:48px;height:48px;font-size:17px;background:#e11d48">AB</span><span><b>Trabalhadores para roçado e cerca — Pará</b><small>Agropecuária Boa Safra (fictícia)</small><small>Interior do Pará</small></span></a><a class="ji" href="../vaga/cozinheiro-portugal.html"><span class="av sq" style="width:48px;height:48px;font-size:17px;background:#e11d48">HA</span><span><b>Cozinheiro(a) em Portugal — contrato e visto de trabalho</b><small>Hotel Atlântico Lda (fictício)</small><small>Porto, Portugal</small></span></a>
+  </aside>
+  <main class="jdet">
+    <div class="co"><span class="av sq" style="width:24px;height:24px;font-size:9px;background:#0891b2">LD</span><a href="#"><b>Lotus Digital Solutions (fictícia)</b></a></div>
+    <h1>Customer Support / Marketing Digital — Bangkok</h1>
+    <div class="sub">Bangkok, Tailândia · há 4 dias · <b>Mais de 100 candidaturas</b></div>
+    <ul class="ins">
+      <li><svg class="i" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2M3 13h18"/></svg><span><span class="pillx">Presencial</span><span class="pillx">Tempo integral</span><span class="pillx">Nível de entrada</span></span></li>
+      <li><svg class="i" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1M10 21v-3h4v3"/></svg><span>2-10 funcionários · Serviços de TI · página criada em out. 2026</span></li>
+      <li><svg class="i" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span>Veja como você se compara a mais de 100 candidatos</span></li>
+    </ul>
+    <div class="jbtns"><button class="apply" type="button" onclick="document.getElementById('apply').showModal()">Candidatura simplificada</button><button class="save" type="button">Salvar</button></div>
+    <div class="jsec"><h2>Conheça a equipe de contratação</h2>
+      <div class="hirer"><span class="av" style="width:56px;height:56px;font-size:21px;background:#db2777">AL</span><span><b>Ana Lima</b> <span class="deg" style="color:var(--p-sub)">• 3º+</span><small>Talent Acquisition | Lotus Digital Solutions</small><small>Perfil criado há 2 semanas · 3 conexões</small></span><span class="msgb">Enviar mensagem</span></div></div>
+    <div class="jsec"><h2>Sobre a vaga</h2>
+      <div class="about">Oportunidade internacional para brasileiros! Benefícios competitivos e processo rápido. Todos os detalhes estão no panfleto da vaga.</div>
+      <div class="flyerw"><img class="flyer" src="../img/scam-bangkok.png" width="720" height="960" alt="Pode ser uma imagem de texto" loading="eager" data-elo-flyer></div>
+      <div data-elo-inline></div>
+    </div>
+    <div class="jsec"><h2>Sobre a empresa</h2>
+      <div class="coabout"><span class="av sq" style="width:56px;height:56px;font-size:20px;background:#0891b2">LD</span><span><b>Lotus Digital Solutions (fictícia)</b><small>14 seguidores · Serviços de TI · 2-10 funcionários</small><small>Sem site informado · sem registro público encontrado</small></span></div></div>
+    <p class="sub" style="margin-top:20px;font-size:12px"><b style="color:var(--p-sub)">Sobre este exemplo:</b> Padrão de scam center (Itamaraty 2026, ONU/ACNUDH 2023, FBI): o texto não diz quase nada e as condições ficam num PANFLETO: salário em dólar, sem experiência, teste de digitação, 18–35 anos, visto de turista, transfer até a fronteira (Mae Sot), Telegram e sigilo. Use &quot;Analisar imagem&quot; do ELO.</p>
+  </main>
 </div>
-<dialog id="apply"><p>Simulação: neste padrão, a "candidatura simplificada" leva a uma conversa no Telegram que pede foto do passaporte e embarque rápido. Não envie documentos. Nenhum dado foi enviado.</p><form method="dialog"><button class="btn">Entendi</button></form></dialog>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"JobPosting","title":"Customer Support / Marketing Digital — Bangkok","url":"https://elo-demo.local/redepro/jobs/view/4100000001","datePosted":"2026-11-03","description":"Oportunidade internacional para brasileiros! Benefícios competitivos e processo rápido. Todos os detalhes estão no panfleto da vaga.","employmentType":"FULL_TIME","hiringOrganization":{"@type":"Organization","name":"Lotus Digital Solutions (fictícia)"},"jobLocation":{"@type":"Place","address":{"@type":"PostalAddress","addressLocality":"Bangkok, Tailândia"}}}</script></body></html>
+<dialog id="apply"><p>Simulação: neste padrão, a "candidatura simplificada" leva a uma conversa no Telegram que pede foto do passaporte e embarque rápido. Não envie documentos. Nenhum dado foi enviado.</p><form method="dialog"><button class="apply">Entendi</button></form></dialog>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"JobPosting","title":"Customer Support / Marketing Digital — Bangkok","url":"https://elo-demo.local/redepro/jobs/view/4100000001","datePosted":"2026-11-03","description":"Oportunidade internacional para brasileiros! Benefícios competitivos e processo rápido. Todos os detalhes estão no panfleto da vaga.","employmentType":"FULL_TIME","hiringOrganization":{"@type":"Organization","name":"Lotus Digital Solutions (fictícia)"},"jobLocation":{"@type":"Place","address":{"@type":"PostalAddress","addressLocality":"Bangkok, Tailândia"}}}</script>
+<div class="sim" role="note"><b>Simulação ELO</b> · rede, empresas e vagas FICTÍCIAS, com padrões reais documentados (OIT, ONU, Itamaraty, PF). <a href="../index.html">Voltar à demonstração</a></div></body></html>
