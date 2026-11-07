@@ -174,11 +174,12 @@ async function waitApi() { for (let i = 0; i < 60; i++) { try { const r = await 
   await page.goto(API + '/lp/#alertas');
   await page.click('#geo-btn'); await page.waitForFunction(() => /obtida/.test(document.getElementById('geo-st').textContent));
   await page.fill('#lp-tel', '+55 11 98888-7777'); await page.check('input[name=lp-areas][value=ti]');
-  const prev = JSON.parse(await page.$eval('#lp-preview', (e) => e.textContent));
-  check(prev.localizacao && prev.fuso_horario && prev.idioma && prev.telefone, 'LP: prévia mostra localização, fuso, idioma e telefone antes de enviar');
   await page.click('#lp-send');
   check(/consentimento/.test(await page.$eval('#lp-res', (e) => e.textContent)), 'LP: sem consentimento não envia');
+  const reqP = page.waitForRequest((r) => r.url().endsWith('/v1/alertas/inscricao'));
   await page.check('#lp-ok'); await page.click('#lp-send');
+  const sent = JSON.parse((await reqP).postData());
+  check(sent.localizacao && sent.fuso_horario && sent.idioma && sent.telefone && sent.consentimento === true, 'LP: envia localização, fuso, idioma e telefone (com consentimento)');
   await page.waitForFunction(() => /Inscrição nº/.test(document.getElementById('lp-res').textContent), null, { timeout: 8000 });
   check(/Brasil/.test(await page.$eval('#lp-res', (e) => e.textContent)), 'LP: inscrição registrada com região estimada e canais de ajuda');
   const subs = await (await fetch(API + '/v1/gestao/inscricoes', { headers: { 'X-Elo-Admin-Key': ADMIN } })).json();

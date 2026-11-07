@@ -160,12 +160,12 @@
   @media print{.top,.cta .ghost,.theme,#dlqr{display:none}}
 
   /* alertas por região */
-  .alerts{display:grid;grid-template-columns:.9fr 1.1fr;gap:32px;align-items:start} .alerts > form{order:2} .alerts > .side{order:1;position:sticky;top:84px}
-  @media (max-width:880px){.alerts{grid-template-columns:1fr} .alerts > form{order:1} .alerts > .side{order:2;position:static}}
+  .alerts{display:block}
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:16px} @media (max-width:720px){.pair{grid-template-columns:1fr}}
   /* alertas: faixa de ponta a ponta */
   section.band{background:linear-gradient(180deg,var(--blue-bg),var(--bg) 85%);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
   .wrap.wide{max-width:1440px} section.band .head{max-width:820px}
-  section.band .sent{max-height:none;min-height:320px}
+  section.band .af{padding:28px} section.band .af .opts label{padding:9px 14px}
   .af{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow)}
   .af h3{margin:0 0 4px;font-size:18px} .af .hint{color:var(--faint);font-size:14px;margin:0 0 14px}
   .af label.l{display:block;font-weight:700;font-size:14px;margin:14px 0 6px}
@@ -366,7 +366,7 @@
 
   <section id="alertas" class="band">
     <div class="wrap wide">
-      <div class="head"><div class="kicker">Alertas por região</div><h2 class="t">Receba avisos de vagas falsas perto de você</h2><p>Conte onde você está e o que procura. Usamos isso para avisar sobre golpes que circulam na sua região e mostrar os canais de ajuda mais próximos. <b>Nenhum campo é obrigatório</b>; você vê ao lado exatamente o que será enviado.</p></div>
+      <div class="head"><div class="kicker">Alertas por região</div><h2 class="t">Receba avisos de vagas falsas perto de você</h2><p>Conte onde você está e o que procura. Usamos isso para avisar sobre golpes que circulam na sua região e mostrar os canais de ajuda mais próximos. <b>Nenhum campo é obrigatório</b>.</p></div>
       <div class="alerts">
         <form class="af" id="alert-form" novalidate>
           <h3>Seus dados (todos opcionais)</h3>
@@ -376,21 +376,20 @@
           <div class="opts" id="lp-areas"></div>
           <label class="l">Onde você quer trabalhar</label>
           <div class="opts" id="lp-regioes"></div>
+          <div class="pair"><div>
           <label class="l" for="lp-tel">Telefone / WhatsApp (opcional)</label>
           <input id="lp-tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="+55 11 99999-0000" maxlength="30">
           <label style="display:flex;gap:8px;align-items:center;font-size:14px;margin-top:8px"><input id="lp-wpp" type="checkbox"> Pode me avisar pelo WhatsApp</label>
+          </div><div>
           <label class="l" for="lp-mail">E-mail (opcional)</label>
           <input id="lp-mail" type="email" autocomplete="email" placeholder="voce@exemplo.com" maxlength="200">
-          <label class="consent"><input id="lp-ok" type="checkbox"><span>Concordo em enviar os dados ao lado para o ELO, só para receber alertas e ver canais de ajuda. Não vendemos nem compartilhamos. Posso pedir para apagar a qualquer momento (LGPD).</span></label>
+          </div></div>
+          <p class="hint" style="margin:14px 0 0">Idioma e fuso horário vêm das configurações do navegador. A localização só é lida se você clicar no botão e permitir; guardamos com precisão de cerca de 100 m.</p>
+          <label class="consent"><input id="lp-ok" type="checkbox"><span>Concordo em enviar os dados deste formulário para o ELO, só para receber alertas e ver canais de ajuda. Não vendemos nem compartilhamos. Posso pedir para apagar a qualquer momento (LGPD).</span></label>
           <button class="btn" type="submit" id="lp-send" style="margin-top:16px">Quero receber alertas</button>
           <details style="margin-top:12px;font-size:13px;color:var(--faint)"><summary>Servidor da API</summary><input id="lp-api" type="url" style="margin-top:6px" placeholder="https://seu-endereco.ngrok-free.app"></details>
           <div class="res" id="lp-res" role="status" aria-live="polite"></div>
         </form>
-        <div class="side">
-          <h3 style="margin:0 0 8px;font-size:16px">O que será enviado</h3>
-          <pre class="sent" id="lp-preview"></pre>
-          <p style="font-size:13px;color:var(--faint)">Idioma e fuso horário vêm das configurações do navegador. A localização só é lida se você clicar no botão e permitir; guardamos com precisão de cerca de 100 m.</p>
-        </div>
       </div>
     </div>
   </section>
@@ -488,14 +487,12 @@
     const mail = $('lp-mail').value.trim(); if (mail) p.email = mail;
     return p;
   }
-  const preview = () => { $('lp-preview').textContent = JSON.stringify(payload(), null, 2); };
-  $('alert-form').addEventListener('input', preview); $('alert-form').addEventListener('change', preview); preview();
   $('geo-btn').onclick = () => {
     if (!('geolocation' in navigator)) { $('geo-st').textContent = 'Este navegador não informa localização.'; return; }
     $('geo-st').textContent = 'Aguardando sua permissão…';
     navigator.geolocation.getCurrentPosition((pos) => {
       geo = { lat: pos.coords.latitude, lon: pos.coords.longitude, precisao_m: Math.round(pos.coords.accuracy) };
-      $('geo-st').textContent = `Localização obtida (precisão de ~${geo.precisao_m} m).`; preview();
+      $('geo-st').textContent = `Localização obtida (precisão de ~${geo.precisao_m} m).`;
     }, (err) => { $('geo-st').textContent = err.code === 1 ? 'Permissão negada. Tudo bem: os alertas usam o fuso horário.' : 'Não foi possível obter a localização.'; },
     { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
   };
