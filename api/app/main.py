@@ -25,7 +25,7 @@ from .limits import RateLimiter
 from .rules_bridge import RulesBridge, RulesError
 from .store import Store
 
-VERSION = "0.3.1"
+VERSION = "0.3.2"
 AREAS = Literal["atendimento", "ti", "marketing_digital", "agro", "construcao", "hotelaria", "domestico", "beleza_entretenimento", "outra"]
 REGIOES = Literal["brasil", "america_do_sul", "europa", "america_do_norte", "oriente_medio", "sudeste_asiatico", "asia_leste"]
 NIVEIS = Literal["alto_risco", "atencao", "dados_insuficientes", "sem_alertas"]
