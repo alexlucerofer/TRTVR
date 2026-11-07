@@ -118,6 +118,14 @@ Câmbio de referência fixo, só para ordem de grandeza do salário: USD 5,5; EU
 - Moderação: crie um usuário em Authentication, rode `insert into admins(user_id) values ('<uuid>')` e use a função `moderate` com o token desse usuário. Também dá para moderar direto no Table Editor.
 - Relatos **não** são enviados a autoridades. O painel diz isso e aponta os canais oficiais.
 
+## Landing page
+
+`site/index.html` é a página pública de divulgação (sem build). O workflow `.github/workflows/pages.yml` publica a pasta no GitHub Pages a cada push em `site/`: https://alexlucerofer.github.io/TRTVR/ (em Settings → Pages, escolha **Source: GitHub Actions**).
+
+- O QR code aponta para a própria página (endereço onde ela estiver publicada). O botão "Baixar QR (PNG)" gera a versão para cartaz.
+- O botão de download aponta para o zip do último release: `npm run zip && gh release create vX.Y.Z elo-extensao.zip`.
+- Para ver localmente: `python3 -m http.server 8090 --directory site`.
+
 ## Desenvolvimento
 
 ```bash

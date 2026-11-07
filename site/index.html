@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ELO — Vagas seguras</title>
+<meta name="description" content="Extensão gratuita para Chrome que mostra, em cada anúncio de emprego, sinais de recrutamento enganoso, tráfico de pessoas e trabalho escravo — com o trecho e a lei que fundamentam o alerta.">
+<meta property="og:title" content="ELO — Vagas seguras">
+<meta property="og:description" content="Antes de aceitar uma vaga, veja os sinais de alerta. Extensão gratuita para Chrome.">
+<meta property="og:image" content="icon.png">
+<link rel="icon" href="icon.png">
+<style>
+  :root{
+    --bg:#ffffff; --bg-soft:#f6f7f9; --card:#ffffff; --ink:#101828; --muted:#475467; --faint:#667085; --line:#eaecf0;
+    --red:#b42318; --red-bg:#fef3f2; --amber:#b54708; --amber-bg:#fffaeb; --green:#067647; --green-bg:#ecfdf3;
+    --blue:#175cd3; --blue-bg:#eff8ff; --violet:#5925dc; --violet-bg:#f4f3ff; --gray-bg:#f2f4f7;
+    --btn:#101828; --btn-ink:#ffffff; --shadow:0 10px 30px rgba(16,24,40,.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0c111d; --bg-soft:#111827; --card:#161b26; --ink:#f5f5f6; --muted:#cecfd2; --faint:#94969c; --line:#2a303c;
+      --red:#f97066; --red-bg:#3a1714; --amber:#fdb022; --amber-bg:#36260a; --green:#47cd89; --green-bg:#0d2e1f;
+      --blue:#84caff; --blue-bg:#102a43; --violet:#bdb4fe; --violet-bg:#221a46; --gray-bg:#1f242f;
+      --btn:#f5f5f6; --btn-ink:#0c111d; --shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0c111d; --bg-soft:#111827; --card:#161b26; --ink:#f5f5f6; --muted:#cecfd2; --faint:#94969c; --line:#2a303c;
+    --red:#f97066; --red-bg:#3a1714; --amber:#fdb022; --amber-bg:#36260a; --green:#47cd89; --green-bg:#0d2e1f;
+    --blue:#84caff; --blue-bg:#102a43; --violet:#bdb4fe; --violet-bg:#221a46; --gray-bg:#1f242f;
+    --btn:#f5f5f6; --btn-ink:#0c111d; --shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:var(--blue)}
+  img,svg{display:block}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+  .ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+  /* topo */
+  .top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .top .wrap{display:flex;align-items:center;gap:16px;height:60px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;color:var(--ink);text-decoration:none;letter-spacing:-.01em}
+  .brand img{width:30px;height:30px;border-radius:8px}
+  .top nav{margin-left:auto;display:flex;gap:20px;font-size:14px}
+  .top nav a{color:var(--muted);text-decoration:none} .top nav a:hover{color:var(--ink)}
+  @media (max-width:720px){.top nav{display:none}}
+
+  /* botões */
+  .btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:700;font-size:16px;padding:14px 20px;border-radius:12px;background:var(--btn);color:var(--btn-ink);border:0;cursor:pointer}
+  .btn:hover{opacity:.92} .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  .btn.sm{font-size:14px;padding:10px 14px;border-radius:10px}
+
+  /* hero */
+  .hero{padding:64px 0 48px;background:radial-gradient(1200px 400px at 80% -10%,var(--red-bg),transparent 60%)}
+  .hero .wrap{display:grid;grid-template-columns:1.2fr .8fr;gap:48px;align-items:center}
+  @media (max-width:880px){.hero .wrap{grid-template-columns:1fr}}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--red);background:var(--red-bg);padding:6px 12px;border-radius:999px}
+  h1{font-size:clamp(34px,6vw,56px);line-height:1.05;letter-spacing:-.03em;margin:18px 0 16px;text-wrap:balance}
+  h1 em{font-style:normal;color:var(--red)}
+  .lead{font-size:clamp(17px,2.2vw,20px);color:var(--muted);max-width:40ch;margin:0 0 28px}
+  .cta{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .small{font-size:13px;color:var(--faint);margin-top:14px}
+
+  .qrcard{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:var(--shadow);text-align:center;max-width:360px;justify-self:center;width:100%}
+  .qrcard h2{font-size:18px;margin:0 0 4px} .qrcard p{margin:0 0 16px;color:var(--muted);font-size:14px}
+  #qr{background:#fff;border-radius:14px;padding:14px;display:grid;place-items:center;aspect-ratio:1;max-width:260px;margin:0 auto}
+  #qr svg{width:100%;height:auto}
+  #qr .fallback{font-size:13px;color:#475467;word-break:break-all}
+  .qrurl{font-size:12px;color:var(--faint);margin:12px 0;word-break:break-all}
+
+  /* seções */
+  section{padding:72px 0}
+  section.soft{background:var(--bg-soft)}
+  .head{max-width:640px;margin:0 0 36px}
+  .kicker{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--red)}
+  h2.t{font-size:clamp(26px,4vw,38px);line-height:1.15;letter-spacing:-.02em;margin:8px 0 12px;text-wrap:balance}
+  .head p{color:var(--muted);margin:0}
+
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;counter-reset:s}
+  @media (max-width:820px){.steps{grid-template-columns:1fr}}
+  .step{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
+  .step .n{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-weight:800;background:var(--ink);color:var(--bg);margin-bottom:12px}
+  .step h3{margin:0 0 6px;font-size:18px} .step p{margin:0;color:var(--muted);font-size:15px}
+
+  /* prévia do alerta */
+  .demo{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+  @media (max-width:880px){.demo{grid-template-columns:1fr}}
+  .bullets{list-style:none;padding:0;margin:0;display:grid;gap:14px}
+  .bullets li{display:flex;gap:12px;align-items:flex-start} .bullets b{display:block}
+  .bullets span{color:var(--muted);font-size:15px}
+  .bullets .bi{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex:none}
+
+  .mock{background:var(--card);border:2px solid var(--red);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);font-size:14px}
+  .mock .mh{background:var(--red-bg);padding:14px 16px;display:flex;gap:12px}
+  .mock .mh .dot{width:30px;height:30px;border-radius:50%;background:var(--red);color:#fff;display:grid;place-items:center;font-weight:800;flex:none}
+  .mock .mh b{color:var(--red);font-size:16px} .mock .mh p{margin:2px 0 0;color:var(--muted);font-size:13.5px;line-height:1.45}
+  .mock .mb{padding:4px 16px 16px}
+  .mtabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:14px}
+  .mtab{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:6px;padding:10px 12px;font-weight:700;font-size:14px;color:var(--faint);border-bottom:3px solid transparent;margin-bottom:-1px}
+  .mtab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--red)}
+  .mtab:focus-visible{outline:2px solid var(--blue);outline-offset:-2px;border-radius:6px 6px 0 0}
+  .mtab .c{font-size:12px;padding:2px 7px;border-radius:999px;background:var(--gray-bg);color:var(--muted)}
+  .mtab[aria-selected="true"] .c{background:var(--red);color:#fff}
+  .main-alert{display:flex;gap:12px;background:var(--red-bg);border:1px solid color-mix(in srgb,var(--red) 25%,transparent);border-radius:12px;padding:14px}
+  .main-alert .ai{width:44px;height:44px;border-radius:12px;background:var(--red);color:#fff;display:grid;place-items:center;flex:none}
+  .main-alert .ai .ic{width:24px;height:24px}
+  .k{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--red)}
+  .main-alert b{display:block;font-size:16px;line-height:1.3}
+  q.qt{display:block;margin-top:8px;border-left:3px solid var(--red);background:var(--card);border-radius:0 6px 6px 0;padding:6px 10px;font-style:italic;font-size:13px;color:var(--muted)}
+  .sig{display:flex;gap:10px;padding:12px 0;border-top:1px solid var(--line);align-items:flex-start}
+  .sig:first-of-type{border-top:0}
+  .sig .si{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;flex:none}
+  .pill{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:3px 7px;border-radius:999px;margin-left:4px;vertical-align:middle}
+  .sec{display:flex;align-items:center;gap:6px;margin:16px 0 4px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .sec .ic{width:16px;height:16px}
+  .job{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px}
+  .job .ji{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none;background:var(--green-bg);color:var(--green)}
+  .job.gov .ji{background:var(--blue-bg);color:var(--blue)}
+  .job div{flex:1;min-width:0} .job b{display:block;line-height:1.3;font-size:14px} .job small{color:var(--faint);font-size:12.5px}
+  .job .go{font-size:12.5px;font-weight:700;background:var(--btn);color:var(--btn-ink);padding:7px 10px;border-radius:8px;white-space:nowrap}
+  [role="tabpanel"][hidden]{display:none}
+  .sevC{background:var(--red-bg);color:var(--red)} .sevA{background:var(--amber-bg);color:var(--amber)} .sevM{background:var(--gray-bg);color:var(--muted)}
+
+  /* sinais */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+  .sigcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+  .sigcard .si{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;margin-bottom:12px}
+  .sigcard h3{font-size:16px;margin:0 0 4px;line-height:1.3} .sigcard p{margin:0;font-size:14px;color:var(--muted)}
+  .note{font-size:14px;color:var(--faint);margin-top:20px}
+
+  /* instalar */
+  .install{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}
+  @media (max-width:880px){.install{grid-template-columns:1fr}}
+  ol.how{margin:0;padding:0;list-style:none;counter-reset:h;display:grid;gap:12px}
+  ol.how li{counter-increment:h;display:flex;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  ol.how li::before{content:counter(h);flex:none;width:28px;height:28px;border-radius:8px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-weight:800;font-size:14px}
+  code{font:600 13.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--gray-bg);padding:2px 6px;border-radius:6px}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px}
+  .box h3{margin:0 0 8px}
+  .box ul{margin:0;padding-left:20px;color:var(--muted)} .box li{margin-bottom:8px}
+
+  /* ajuda */
+  .help{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+  .hcard{display:flex;gap:14px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;text-decoration:none;color:var(--ink)}
+  .hcard:hover{border-color:var(--blue)}
+  .hcard .num{font-size:26px;font-weight:900;letter-spacing:-.02em;color:var(--red);min-width:56px}
+  .hcard b{display:block} .hcard span{font-size:14px;color:var(--muted)}
+
+  .disclaimer{display:flex;gap:14px;align-items:flex-start;background:var(--amber-bg);border-radius:16px;padding:20px;margin-top:32px;color:var(--ink)}
+  .disclaimer .ic{color:var(--amber);width:24px;height:24px;margin-top:2px}
+  .disclaimer p{margin:0;font-size:15px}
+
+  footer{border-top:1px solid var(--line);padding:32px 0;color:var(--faint);font-size:14px}
+  footer .wrap{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between;align-items:center}
+  .theme{background:none;border:1px solid var(--line);border-radius:8px;padding:6px 10px;color:var(--muted);cursor:pointer;font:inherit;font-size:13px}
+
+  @media print{.top,.cta .ghost,.theme,#dlqr{display:none}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-money" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.6-1.5-3-1.5-1.7 0-3 .8-3 2s1.3 1.7 3 2 3 .8 3 2-1.3 2-3 2c-1.4 0-2.5-.5-3-1.5M12 6v2m0 8v2"/></symbol>
+  <symbol id="i-passport" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M8.5 17h7"/></symbol>
+  <symbol id="i-chain" viewBox="0 0 24 24"><path d="M9 15l6-6"/><path d="M10.5 6.5l1.8-1.8a4 4 0 015.7 5.7l-1.8 1.8M13.5 17.5l-1.8 1.8a4 4 0 01-5.7-5.7l1.8-1.8"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-house" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-hourglass" viewBox="0 0 24 24"><path d="M6 3h12M6 21h12M7 3c0 4 5 5 5 9s-5 5-5 9M17 3c0 4-5 5-5 9s5 5 5 9"/></symbol>
+  <symbol id="i-contract" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M14 3v6h6M9 14l6 6M15 14l-6 6"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 12a8 8 0 01-11.8 7L4 20l1.1-4.6A8 8 0 1121 12z"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></symbol>
+  <symbol id="i-job" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2M3 13h18"/></symbol>
+  <symbol id="i-gov" viewBox="0 0 24 24"><path d="M3 10l9-6 9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 21h18"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20V3H6.5A2.5 2.5 0 004 5.5z"/><path d="M4 19.5A2.5 2.5 0 006.5 22H20v-5"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></symbol>
+</svg>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#"><img src="icon.png" alt="" width="30" height="30">ELO</a>
+    <nav aria-label="Seções"><a href="#como">Como funciona</a><a href="#sinais">O que detecta</a><a href="#instalar">Instalar</a><a href="#ajuda">Pedir ajuda</a></nav>
+    <a class="btn sm" href="#instalar">Baixar grátis</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero" style="padding-top:64px">
+    <div class="wrap">
+      <div>
+        <span class="eyebrow"><svg class="ic" style="width:16px;height:16px"><use href="#i-shield"/></svg>Extensão gratuita para Chrome</span>
+        <h1>Antes de aceitar a vaga, <em>veja os sinais.</em></h1>
+        <p class="lead">O ELO lê os anúncios de emprego que você abre e avisa, na hora, quando aparecem sinais de golpe, tráfico de pessoas ou trabalho escravo. Mostra o trecho do anúncio, a lei e vagas mais seguras.</p>
+        <div class="cta">
+          <a class="btn dl" href="https://github.com/alexlucerofer/TRTVR/releases/latest/download/elo-extensao.zip"><svg class="ic"><use href="#i-download"/></svg>Baixar a extensão</a>
+          <a class="btn ghost" href="#como">Como funciona</a>
+        </div>
+        <p class="small">Grátis · sem cadastro · a leitura acontece no seu navegador</p>
+      </div>
+      <aside class="qrcard" aria-labelledby="qr-t">
+        <h2 id="qr-t">Compartilhe o ELO</h2>
+        <p>Aponte a câmera do celular para abrir esta página.</p>
+        <div id="qr" role="img" aria-label="QR code com o endereço desta página"></div>
+        <div class="qrurl" id="qrurl"></div>
+        <button class="btn sm ghost" id="dlqr" type="button"><svg class="ic" style="width:16px;height:16px"><use href="#i-download"/></svg>Baixar QR (PNG) para imprimir</button>
+      </aside>
+    </div>
+  </section>
+
+  <section id="como" class="soft">
+    <div class="wrap">
+      <div class="head"><div class="kicker">Como funciona</div><h2 class="t">Três passos, sem sair da página da vaga</h2><p>Funciona em portais de vagas, no Google e em redes sociais. Você continua navegando normalmente.</p></div>
+      <div class="steps">
+        <div class="step"><div class="n">1</div><h3>Abra qualquer vaga</h3><p>Portal de empregos, resultado do Google ou post no Facebook. O ELO identifica sozinho que é uma oferta de trabalho.</p></div>
+        <div class="step"><div class="n">2</div><h3>Veja o selo</h3><p><b style="color:var(--red)">Alto risco</b>, <b style="color:var(--amber)">Atenção</b> ou <b style="color:var(--green)">Sem alertas</b>, ao lado do anúncio, com o motivo principal escrito.</p></div>
+        <div class="step"><div class="n">3</div><h3>Entenda e escolha</h3><p>Na aba <b>Alerta</b>, o que foi encontrado e por quê. Na aba <b>Vagas verdadeiras</b>, opções mais seguras e portais oficiais.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap demo">
+      <div>
+        <div class="head" style="margin-bottom:24px"><div class="kicker">O alerta</div><h2 class="t">Explica o motivo, não só dá um selo</h2><p>Cada alerta mostra o trecho exato do anúncio e o fundamento: indicadores da OIT, Código Penal (arts. 149, 149-A, 206 e 207), Lei 13.344/2016 e alertas da ONU e da Polícia Federal.</p></div>
+        <ul class="bullets">
+          <li><span class="bi sevC"><svg class="ic"><use href="#i-alert"/></svg></span><div><b>Alerta principal em destaque</b><span>O sinal mais grave aparece primeiro, com o trecho que o gerou.</span></div></li>
+          <li><span class="bi sevA"><svg class="ic"><use href="#i-list"/></svg></span><div><b>Cada sinal com ícone e gravidade</b><span>Crítico, alto ou médio, fácil de entender de relance.</span></div></li>
+          <li><span class="bi" style="background:var(--green-bg);color:var(--green)"><svg class="ic"><use href="#i-job"/></svg></span><div><b>Vagas verdadeiras ao lado</b><span>Vagas parecidas de parceiros verificados e portais oficiais como SINE, EURES e IEFP.</span></div></li>
+        </ul>
+      </div>
+
+      <div class="mock" role="region" aria-label="Exemplo de alerta do ELO">
+        <div class="mh"><div class="dot">⚠</div><div><b>ELO: Alto risco</b><p>Encontramos sinais que a OIT e a lei brasileira associam a recrutamento enganoso. Isso não prova crime, mas a oferta precisa ser verificada.</p></div></div>
+        <div class="mb">
+          <div class="mtabs" role="tablist" aria-label="Exemplo">
+            <button class="mtab" role="tab" id="mt0" aria-controls="mp0" aria-selected="true" tabindex="0"><svg class="ic" style="width:16px;height:16px"><use href="#i-alert"/></svg>Alerta <span class="c">4</span></button>
+            <button class="mtab" role="tab" id="mt1" aria-controls="mp1" aria-selected="false" tabindex="-1"><svg class="ic" style="width:16px;height:16px"><use href="#i-job"/></svg>Vagas verdadeiras <span class="c">3</span></button>
+          </div>
+          <div role="tabpanel" id="mp0" aria-labelledby="mt0">
+            <div class="main-alert">
+              <div class="ai"><svg class="ic"><use href="#i-money"/></svg></div>
+              <div><div class="k">Alerta principal · Crítico</div><b>Cobrança para conseguir a vaga</b><q class="qt">…para garantir sua vaga é preciso pagar a taxa de visto de R$ 450 via Pix…</q></div>
+            </div>
+            <div class="sec"><svg class="ic"><use href="#i-alert"/></svg>O que mais o ELO encontrou</div>
+            <div class="sig"><span class="si sevC"><svg class="ic"><use href="#i-chain"/></svg></span><div><b>Dívida com passagem e moradia</b><span class="pill sevC">Crítico</span></div></div>
+            <div class="sig"><span class="si sevA"><svg class="ic"><use href="#i-globe"/></svg></span><div><b>Padrão de aliciamento no Sudeste Asiático</b><span class="pill sevA">Alto</span></div></div>
+            <div class="sig"><span class="si sevM"><svg class="ic"><use href="#i-chat"/></svg></span><div><b>Contato só por WhatsApp</b><span class="pill sevM">Médio</span></div></div>
+          </div>
+          <div role="tabpanel" id="mp1" aria-labelledby="mt1" hidden>
+            <div class="sec" style="margin-top:4px"><svg class="ic"><use href="#i-job"/></svg>Vagas que parecem mais seguras</div>
+            <div class="job"><span class="ji"><svg class="ic"><use href="#i-job"/></svg></span><div><b>Atendente de SAC bilíngue — CLT</b><small>Remoto (Brasil) · R$ 3.600</small></div><span class="go">Ver vaga</span></div>
+            <div class="job"><span class="ji"><svg class="ic"><use href="#i-job"/></svg></span><div><b>Suporte técnico júnior — espanhol</b><small>São Paulo/SP · R$ 3.100</small></div><span class="go">Ver vaga</span></div>
+            <div class="sec"><svg class="ic"><use href="#i-gov"/></svg>Portais oficiais</div>
+            <div class="job gov"><span class="ji"><svg class="ic"><use href="#i-gov"/></svg></span><div><b>EURES — vagas na União Europeia</b><small>Portal oficial da UE</small></div><span class="go">Abrir</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="sinais" class="soft">
+    <div class="wrap">
+      <div class="head"><div class="kicker">O que o ELO detecta</div><h2 class="t">Sinais documentados por quem combate o tráfico</h2><p>Regras escritas a partir das fontes oficiais. País, salário ou relatos, sozinhos, nunca geram alerta.</p></div>
+      <div class="grid">
+        <div class="sigcard"><div class="si sevC"><svg class="ic"><use href="#i-money"/></svg></div><h3>Cobrança para conseguir a vaga</h3><p>Taxa de visto, curso ou reserva. Pela OIT, quem procura emprego não paga pelo recrutamento.</p></div>
+        <div class="sigcard"><div class="si sevC"><svg class="ic"><use href="#i-passport"/></svg></div><h3>Retenção de documentos</h3><p>Empresa que fica com o passaporte é indicador de trabalho forçado (CP, art. 149).</p></div>
+        <div class="sigcard"><div class="si sevC"><svg class="ic"><use href="#i-chain"/></svg></div><h3>Servidão por dívida</h3><p>Passagem, moradia ou comida descontadas do salário criam uma dívida que prende.</p></div>
+        <div class="sigcard"><div class="si sevC"><svg class="ic"><use href="#i-lock"/></svg></div><h3>Restrição de liberdade</h3><p>Recolher celular, proibir saída ou vigiar o trabalhador.</p></div>
+        <div class="sigcard"><div class="si sevA"><svg class="ic"><use href="#i-clock"/></svg></div><h3>Jornada exaustiva</h3><p>12 horas ou mais por dia, ou sem folga.</p></div>
+        <div class="sigcard"><div class="si sevA"><svg class="ic"><use href="#i-house"/></svg></div><h3>Alojamento isolado</h3><p>Levar para fazenda, obra ou garimpo em outro estado, com alojamento no local.</p></div>
+        <div class="sigcard"><div class="si sevA"><svg class="ic"><use href="#i-globe"/></svg></div><h3>Centros de golpe na Ásia</h3><p>Vagas de atendimento ou cripto na Tailândia, Camboja ou Mianmar, sem experiência e por mensageiro (ONU, PF).</p></div>
+        <div class="sigcard"><div class="si sevA"><svg class="ic"><use href="#i-eye"/></svg></div><h3>Aliciamento para exploração sexual</h3><p>Pedido de fotos de corpo ou vagas de "modelo" e "dançarina" no exterior.</p></div>
+        <div class="sigcard"><div class="si sevA"><svg class="ic"><use href="#i-copy"/></svg></div><h3>Anúncio replicado</h3><p>O mesmo texto já apareceu com outra empresa ou outro contato.</p></div>
+        <div class="sigcard"><div class="si sevA"><svg class="ic"><use href="#i-list"/></svg></div><h3>Lista suja do trabalho escravo</h3><p>Nome no Cadastro de Empregadores do Ministério do Trabalho.</p></div>
+        <div class="sigcard"><div class="si sevM"><svg class="ic"><use href="#i-hourglass"/></svg></div><h3>Pressão e urgência</h3><p>"Embarque imediato", "sem entrevista", "não conte para a família".</p></div>
+        <div class="sigcard"><div class="si sevM"><svg class="ic"><use href="#i-contract"/></svg></div><h3>Exterior sem contrato ou visto</h3><p>Vagas legítimas lá fora falam em contrato escrito e visto de trabalho.</p></div>
+      </div>
+      <p class="note">Também lê anúncios em inglês e espanhol, e confere idade do domínio, CNPJ e registros públicos da empresa.</p>
+    </div>
+  </section>
+
+  <section id="instalar">
+    <div class="wrap">
+      <div class="head"><div class="kicker">Instalar</div><h2 class="t">Instale em 2 minutos</h2><p>A extensão ainda não está na Chrome Web Store. Até lá, instale assim no Chrome (ou Edge, Brave):</p></div>
+      <div class="install">
+        <ol class="how">
+          <li><div><b>Baixe e descompacte</b><br><a class="dl" href="https://github.com/alexlucerofer/TRTVR/releases/latest/download/elo-extensao.zip">elo-extensao.zip</a>. Descompacte numa pasta que você não vai apagar.</div></li>
+          <li><div><b>Abra as extensões</b><br>Digite <code>chrome://extensions</code> na barra de endereço e ligue o <b>Modo do desenvolvedor</b>, no canto superior direito.</div></li>
+          <li><div><b>Carregue a pasta</b><br>Clique em <b>Carregar sem compactação</b> e escolha a pasta descompactada.</div></li>
+          <li><div><b>Pronto</b><br>Fixe o ícone do ELO na barra e abra qualquer vaga de emprego.</div></li>
+        </ol>
+        <div class="box">
+          <h3><svg class="ic" style="display:inline;vertical-align:-4px;margin-right:6px;color:var(--green)"><use href="#i-shield"/></svg>Sua privacidade</h3>
+          <ul>
+            <li>A leitura do anúncio acontece <b>no seu navegador</b>.</li>
+            <li>Só envia algo ao servidor quando encontra sinal de risco ou quando você clica no selo, e <b>nunca</b> o nome de quem postou.</li>
+            <li>O histórico fica só no seu navegador e pode ser apagado no ícone da extensão.</li>
+            <li>Dá para pausar o ELO em qualquer site.</li>
+            <li>Sem IA treinada: regras abertas, escritas a partir das fontes citadas.</li>
+          </ul>
+          <p style="margin:16px 0 0"><a href="https://github.com/alexlucerofer/TRTVR">Ver o código no GitHub</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="ajuda" class="soft">
+    <div class="wrap">
+      <div class="head"><div class="kicker">Pedir ajuda</div><h2 class="t">Desconfiou de uma vaga? Procure os canais oficiais</h2><p>O ELO não envia denúncias às autoridades. Estes canais são gratuitos.</p></div>
+      <div class="help">
+        <a class="hcard" href="https://www.gov.br/mdh/pt-br/ondh" target="_blank" rel="noopener"><span class="num">100</span><div><b>Disque 100</b><span>Direitos humanos, tráfico de pessoas e trabalho escravo. 24h.</span></div></a>
+        <a class="hcard" href="https://www.gov.br/mulheres/pt-br/ligue180" target="_blank" rel="noopener"><span class="num">180</span><div><b>Ligue 180</b><span>Central de Atendimento à Mulher, inclusive exploração sexual.</span></div></a>
+        <div class="hcard"><span class="num">190</span><div><b>Polícia — emergência</b><span>Perigo imediato no Brasil.</span></div></div>
+        <a class="hcard" href="https://ipe.sit.trabalho.gov.br" target="_blank" rel="noopener"><span class="num" style="font-size:20px">Ipê</span><div><b>Sistema Ipê (MTE)</b><span>Denúncia de trabalho análogo ao de escravo. Pode ser anônima.</span></div></a>
+        <a class="hcard" href="https://www.gov.br/mre/pt-br/assuntos/portal-consular" target="_blank" rel="noopener"><span class="num" style="font-size:20px"><svg class="ic" style="width:30px;height:30px"><use href="#i-globe"/></svg></span><div><b>Itamaraty — Portal Consular</b><span>Brasileiros no exterior: plantão das embaixadas e consulados.</span></div></a>
+      </div>
+      <div class="disclaimer"><svg class="ic"><use href="#i-alert"/></svg><p><b>O ELO aponta sinais, não acusa empresas.</b> Um alerta indica que a oferta precisa ser verificada antes de você enviar documentos, pagar qualquer valor ou viajar. Mesmo que você aceite, o consentimento obtido por engano não vale (Protocolo de Palermo).</p></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>ELO — Vagas seguras · v0.2.0 · prevenção ao tráfico de pessoas e ao trabalho escravo</span>
+    <button class="theme" id="theme" type="button">Alternar tema</button>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+(() => {
+  // QR code com o endereço público desta página (sem #âncora)
+  const url = location.href.split('#')[0].split('?')[0];
+  const box = document.getElementById('qr');
+  document.getElementById('qrurl').textContent = url;
+  let qr = null;
+  try {
+    qr = qrcode(0, 'M'); qr.addData(url); qr.make();
+    box.innerHTML = qr.createSvgTag({ cellSize: 8, margin: 0, scalable: true });
+  } catch (e) {
+    box.innerHTML = '<div class="fallback">Não foi possível gerar o QR code. Endereço: ' + url.replace(/[<>&]/g, '') + '</div>';
+  }
+  document.getElementById('dlqr').addEventListener('click', () => {
+    if (!qr) return;
+    const n = qr.getModuleCount(), cell = 16, pad = 4 * cell, size = n * cell + pad * 2;
+    const c = document.createElement('canvas'); c.width = c.height = size + 120;
+    const g = c.getContext('2d');
+    g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
+    g.fillStyle = '#101828';
+    for (let r = 0; r < n; r++) for (let k = 0; k < n; k++) if (qr.isDark(r, k)) g.fillRect(pad + k * cell, pad + r * cell, cell, cell);
+    g.font = '700 40px system-ui, sans-serif'; g.textAlign = 'center';
+    g.fillText('ELO — Vagas seguras', c.width / 2, size + 50);
+    g.font = '24px system-ui, sans-serif'; g.fillStyle = '#475467';
+    g.fillText(url.replace(/^https?:\/\//, ''), c.width / 2, size + 90);
+    const a = document.createElement('a'); a.download = 'elo-qrcode.png'; a.href = c.toDataURL('image/png'); a.click();
+  });
+
+  // abas da prévia
+  const tabs = [...document.querySelectorAll('.mtab')];
+  const sel = (t, kb) => { tabs.forEach((x) => { const on = x === t; x.setAttribute('aria-selected', on); x.tabIndex = on ? 0 : -1; document.getElementById(x.getAttribute('aria-controls')).hidden = !on; }); if (kb) t.focus(); };
+  tabs.forEach((t, i) => {
+    t.addEventListener('click', () => sel(t));
+    t.addEventListener('keydown', (e) => { const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key]; if (d) { e.preventDefault(); sel(tabs[(i + d + tabs.length) % tabs.length], true); } });
+  });
+
+  // tema
+  const root = document.documentElement;
+  try { const t = localStorage.getItem('elo-theme'); if (t) root.dataset.theme = t; } catch (e) {}
+  document.getElementById('theme').addEventListener('click', () => {
+    const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    root.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('elo-theme', root.dataset.theme); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>
