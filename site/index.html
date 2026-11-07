@@ -160,7 +160,12 @@
   @media print{.top,.cta .ghost,.theme,#dlqr{display:none}}
 
   /* alertas por região */
-  .alerts{display:grid;grid-template-columns:1.1fr .9fr;gap:24px;align-items:start} @media (max-width:880px){.alerts{grid-template-columns:1fr}}
+  .alerts{display:grid;grid-template-columns:.9fr 1.1fr;gap:32px;align-items:start} .alerts > form{order:2} .alerts > .side{order:1;position:sticky;top:84px}
+  @media (max-width:880px){.alerts{grid-template-columns:1fr} .alerts > form{order:1} .alerts > .side{order:2;position:static}}
+  /* alertas: faixa de ponta a ponta */
+  section.band{background:linear-gradient(180deg,var(--blue-bg),var(--bg) 85%);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .wrap.wide{max-width:1440px} section.band .head{max-width:820px}
+  section.band .sent{max-height:none;min-height:320px}
   .af{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow)}
   .af h3{margin:0 0 4px;font-size:18px} .af .hint{color:var(--faint);font-size:14px;margin:0 0 14px}
   .af label.l{display:block;font-weight:700;font-size:14px;margin:14px 0 6px}
@@ -359,9 +364,9 @@
     </div>
   </section>
 
-  <section id="alertas">
-    <div class="wrap">
-      <div class="head"><div class="kicker">Alertas por região</div><h2 class="t">Receba avisos de vagas falsas perto de você</h2><p>Conte onde você está e o que procura. Usamos isso para avisar sobre golpes que circulam na sua região e mostrar os canais de ajuda mais próximos. <b>Nenhum campo é obrigatório</b>; você vê abaixo exatamente o que será enviado.</p></div>
+  <section id="alertas" class="band">
+    <div class="wrap wide">
+      <div class="head"><div class="kicker">Alertas por região</div><h2 class="t">Receba avisos de vagas falsas perto de você</h2><p>Conte onde você está e o que procura. Usamos isso para avisar sobre golpes que circulam na sua região e mostrar os canais de ajuda mais próximos. <b>Nenhum campo é obrigatório</b>; você vê ao lado exatamente o que será enviado.</p></div>
       <div class="alerts">
         <form class="af" id="alert-form" novalidate>
           <h3>Seus dados (todos opcionais)</h3>
@@ -381,7 +386,7 @@
           <details style="margin-top:12px;font-size:13px;color:var(--faint)"><summary>Servidor da API</summary><input id="lp-api" type="url" style="margin-top:6px" placeholder="https://seu-endereco.ngrok-free.app"></details>
           <div class="res" id="lp-res" role="status" aria-live="polite"></div>
         </form>
-        <div>
+        <div class="side">
           <h3 style="margin:0 0 8px;font-size:16px">O que será enviado</h3>
           <pre class="sent" id="lp-preview"></pre>
           <p style="font-size:13px;color:var(--faint)">Idioma e fuso horário vêm das configurações do navegador. A localização só é lida se você clicar no botão e permitir; guardamos com precisão de cerca de 100 m.</p>
