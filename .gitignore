@@ -1,0 +1,4 @@
+.env
+node_modules/
+elo-extensao.zip
+tests/screens/

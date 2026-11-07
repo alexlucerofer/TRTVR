@@ -1,0 +1,11 @@
+# Trecho de configuração das Edge Functions (mescle com o config.toml gerado por `supabase init`, se houver).
+# verify_jwt = false: as chaves novas "publishable" (sb_publishable_...) não são JWT. As funções
+# validam a entrada por conta própria; gravações usam a service role apenas no servidor.
+[functions.analyze]
+verify_jwt = false
+
+[functions.report]
+verify_jwt = false
+
+[functions.moderate]
+verify_jwt = false

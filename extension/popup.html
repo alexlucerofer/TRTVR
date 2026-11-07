@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><title>ELO</title>
+<style>
+  body{font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;width:300px;margin:0;padding:16px;color:#101828}
+  h1{font-size:16px;margin:0 0 4px} .muted{color:#667085;font-size:12px} .row{margin:12px 0}
+  .pill{display:inline-block;border-radius:999px;padding:2px 8px;font-size:12px;font-weight:600}
+  button{font:inherit;width:100%;padding:8px;border-radius:8px;border:1px solid #d0d5dd;background:#fff;cursor:pointer;margin-top:6px}
+  a{color:#175cd3}
+</style></head>
+<body>
+  <h1>ELO — Vagas seguras</h1>
+  <div class="muted">Analisa ofertas de emprego nas páginas que você abre. A leitura acontece no navegador.</div>
+  <div class="row">Conexão: <span id="mode" class="pill">…</span></div>
+  <div class="row"><span id="host"></span><button id="pause" type="button">…</button></div>
+  <button id="clear" type="button">Apagar meu histórico local</button>
+  <div class="row"><a href="options.html" target="_blank">Configurar Supabase</a></div>
+  <script src="popup.js"></script>
+</body></html>

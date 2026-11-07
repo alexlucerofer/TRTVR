@@ -1,0 +1,13 @@
+{
+  "name": "elo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ELO — prevenção ao tráfico de pessoas e ao trabalho escravo via ofertas de emprego enganosas",
+  "scripts": {
+    "build": "node scripts/build-seed.js && node scripts/build-demo.js",
+    "test": "node --test tests/rules.test.js",
+    "test:e2e": "node tests/e2e.js",
+    "demo": "python3 -m http.server 8080 --directory demo",
+    "zip": "cd extension && zip -qr ../elo-extensao.zip ."
+  }
+}

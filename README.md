@@ -1,0 +1,132 @@
+# ELO — vagas seguras
+
+Extensão para Chrome que identifica ofertas de emprego nas páginas que a pessoa abre e mostra, ao lado de cada anúncio, **sinais de recrutamento enganoso, tráfico de pessoas e trabalho análogo à escravidão**, sempre com:
+
+- o **trecho do anúncio** que gerou o alerta;
+- o **fundamento** (indicadores da OIT, Código Penal arts. 149, 149-A, 206 e 207, Lei 13.344/2016, Protocolo de Palermo, alertas da ONU/PF sobre o Sudeste Asiático);
+- a separação entre **informações verificadas**, **alertas** e **informações insuficientes**;
+- **vagas parecidas verificadas** (Brasil e exterior) e **canais oficiais de ajuda**.
+
+O ELO **não afirma que uma empresa comete crime**. Ele aponta sinais que precisam ser verificados. País, salário ou relatos, sozinhos, nunca geram alerta. Não há IA treinada: são regras escritas a partir das fontes em [docs/REFERENCIAS.md](docs/REFERENCIAS.md).
+
+## Estrutura
+
+```
+shared/rules.js            motor de regras (fonte única; copiado para extensão e Edge Functions)
+shared/analyze_core.js     fluxo: validar → verificar fatos → regras → gravar → alternativas
+data/demo-data.js          dados iniciais (fictícios marcados + canais de apoio reais)
+supabase/migrations/       esquema + RLS
+supabase/seed.sql          GERADO por scripts/build-seed.js
+supabase/functions/        analyze, report, moderate (Deno)
+extension/                 extensão Chrome MV3 (carregar esta pasta)
+demo/vagas.html            portal de vagas fictício (5 vagas)
+demo/feed.html             feed social fictício (posts role="article", carrega mais ao rolar)
+tests/                     testes unitários e E2E
+docs/                      referências, dados para a plataforma
+```
+
+## 1. Banco (Supabase) — ~10 min
+
+1. Crie um projeto grátis em https://supabase.com.
+2. **SQL Editor** → cole e rode `supabase/migrations/20261107000001_elo_schema.sql`.
+3. **SQL Editor** → cole e rode `supabase/seed.sql`.
+4. Confira em **Table Editor**: `companies` (7), `opportunities` (6), `support_resources` (11), `risk_indicators` (17), `legal_references` (16), `jobs` (1 anúncio "já visto").
+
+## 2. Edge Functions — ~10 min
+
+Com a [Supabase CLI](https://supabase.com/docs/guides/cli) instalada, na raiz do projeto:
+
+```bash
+supabase login
+supabase link --project-ref SEU_PROJECT_REF
+supabase functions deploy analyze --no-verify-jwt
+supabase functions deploy report  --no-verify-jwt
+supabase functions deploy moderate --no-verify-jwt
+supabase secrets set REPORT_SALT=um-valor-aleatorio
+```
+
+`SUPABASE_URL`, `SUPABASE_ANON_KEY` e `SUPABASE_SERVICE_ROLE_KEY` são injetadas automaticamente pelo Supabase nas funções. A service role **só existe no servidor**. `--no-verify-jwt` é necessário porque as chaves novas `sb_publishable_…` não são JWT. As funções validam a entrada por conta própria.
+
+Teste rápido:
+
+```bash
+curl -X POST https://SEU-PROJETO.supabase.co/functions/v1/analyze \
+  -H "apikey: SUA_ANON_KEY" -H "Authorization: Bearer SUA_ANON_KEY" -H "Content-Type: application/json" \
+  -d '{"job":{"title":"Atendente em Bangkok","description":"Não precisa experiência. Pague a taxa de visto via Pix. Chama no WhatsApp.","url":"https://exemplo.test/1"}}'
+```
+
+A resposta deve ter `"mode":"supabase"` e um `analysis_id`. A linha aparece em `analyses`.
+
+## 3. Extensão — ~2 min
+
+1. Chrome → `chrome://extensions` → ligue **Modo do desenvolvedor**.
+2. **Carregar sem compactação** → escolha a pasta `extension/`.
+3. Clique no ícone do ELO → **Configurar Supabase** → cole a URL e a chave **anon/publishable** → **Salvar e testar conexão**. O teste lê o banco e grava uma análise de teste.
+
+Sem configuração, a extensão funciona em **modo local**: mesmas regras, dados de demonstração, nada gravado. O painel sempre diz em qual modo está.
+
+## 4. Demonstração — internet simulada
+
+```bash
+python3 -m http.server 8080 --directory demo
+```
+
+Abra http://localhost:8080. Daí saem quatro páginas, todas geradas de `data/demo-data.js`:
+
+- **Buscador** (`busca.html`): resultados com link para cada vaga. O ELO marca cada resultado com **análise preliminar**, porque só tem título e resumo. Resultados de sites de governo são ignorados.
+- **Rede social** (`feed.html`): posts comuns misturados com ofertas. Mais posts carregam depois, como num feed real. O ELO só mostra o selo nas ofertas com sinais de risco.
+- **Portal de vagas** (`vagas.html`): 10 vagas, sendo 4 consistentes (SP, GO, Portugal e Espanha em espanhol), 1 sem dados e 5 de risco (Pará, Tailândia, Tailândia em inglês, Dubai e Camboja).
+- **Na página de cada vaga, a análise aparece no meio do anúncio**: resumo, os 3 principais motivos com o trecho, o botão "Ver em detalhes por que parece falsa" e, logo abaixo, **vagas que parecem mais seguras** e **portais oficiais**.
+- **Idiomas:** anúncios em inglês e espanhol são detectados e analisados com regras nesses idiomas. Se o Chrome tiver o tradutor embutido (Translator API, Chrome 138+), aparece o botão "Traduzir anúncio para português", que traduz no próprio navegador.
+- **Página de cada vaga** (`vaga/*.html`): tem dados estruturados JSON-LD `JobPosting`, como portais reais, e análise completa. O botão "Candidatar-se" abre uma explicação do que aconteceria naquele tipo de anúncio, sem enviar nada.
+
+Os textos de risco seguem padrões documentados (ONU/ACNUDH 2023, Itamaraty, PF 2026, OIT, art. 149 do CP). Cada página da vaga diz em qual padrão se baseia. Em vagas de risco, o painel mostra **vagas parecidas** de parceiros fictícios e **portais oficiais reais**: SINE para vagas no Brasil; EURES, IEFP e Job Bank Canada para vagas no exterior.
+
+**Prova de persistência:** depois de clicar num selo, abra o Supabase → `analyses`. Lá está a linha com o mesmo id mostrado no rodapé do painel. Relatos aparecem em `reports` como `pendente`.
+
+Roteiro sugerido: **buscador → resultado com "Atenção (preliminar)" → abrir a vaga → selo "Alto risco" → painel com trechos, leis, vagas parecidas e portais oficiais → id da análise → mostrar a linha no Supabase → enviar relato → `reports` pendente.**
+
+## Como funciona em sites reais
+
+| Onde | O que o ELO lê | Tipo de análise |
+|---|---|---|
+| Página com `data-elo-job` (demo) | título, empresa, local, salário, descrição | completa |
+| Sites com JSON-LD `JobPosting` (muitos portais: LinkedIn, Indeed, Gupy etc.) | dados estruturados da vaga | completa |
+| Google (`/search`) | título + resumo dos resultados com cara de vaga | **preliminar** |
+| Facebook e outros feeds (`[role="article"]`) | texto visível de cada post; reanalisa ao clicar em "Ver mais" | completa se o texto for longo |
+| Página genérica de vaga | `h1` + texto principal | completa |
+
+Não cobrimos "todas as vagas da internet". Só o que está na página aberta.
+
+**Privacidade (LGPD):** a leitura é feita no navegador. Em feeds e no Google, o ELO só envia algo ao servidor quando encontra sinal de risco ou quando a pessoa clica no selo. O nome de quem postou nunca é enviado. O histórico ("você viu anúncio igual há 30 dias", "mesmo telefone com outra empresa") fica só no navegador e pode ser apagado no popup. Dá para pausar por site.
+
+## Verificações externas (feitas na Edge Function, com tempo-limite)
+
+- **RDAP** (`rdap.org`): idade do domínio do site/e-mail da empresa. Funciona para .com, .net, .es e outros. Alguns ccTLDs não têm RDAP e caem em "insuficiente".
+- **BrasilAPI** (`/api/cnpj/v1`): situação e data de abertura do CNPJ citado no anúncio.
+- **GLEIF**: nome de empresa estrangeira no registro LEI (só cobre empresas maiores).
+- **Cadastro de Empregadores (lista suja)**: tabela `employer_registry`. O registro incluído é FICTÍCIO. Para usar a lista oficial, baixe a planilha no site do MTE, salve como CSV e importe pelo Table Editor (colunas: `employer_name, document, uf, establishment, workers, inclusion_date, source`).
+
+Falha de uma verificação **nunca vira alerta**. Ela aparece em "informações insuficientes".
+
+Câmbio de referência fixo, só para ordem de grandeza do salário: USD 5,5; EUR 6; GBP 7; THB 0,16; AED 1,5.
+
+## Segurança
+
+- RLS ligado em todas as tabelas. `anon` só tem SELECT nas tabelas públicas. Nenhum INSERT/UPDATE/DELETE no cliente.
+- `reports` não é legível nem gravável pelo cliente. Relatos entram como `pendente` via Edge Function `report` (limite de 5 por origem por dia). Só os aprovados aparecem, sem identificação, na view `public_reports`.
+- Moderação: crie um usuário em Authentication, rode `insert into admins(user_id) values ('<uuid>')` e use a função `moderate` com o token desse usuário. Também dá para moderar direto no Table Editor.
+- Relatos **não** são enviados a autoridades. O painel diz isso e aponta os canais oficiais.
+
+## Desenvolvimento
+
+```bash
+npm run build      # regenera seed.sql, seed.json, demo/*.html e copia rules.js/analyze_core.js
+npm test           # testes unitários das regras
+npm run test:e2e   # Chromium + extensão nas páginas de demo (requer Playwright)
+npm run zip        # gera elo-extensao.zip
+```
+
+Edite as regras **só** em `shared/` e os dados **só** em `data/demo-data.js`, e rode `npm run build`.
+
+Veja [TESTES.md](TESTES.md) para o que foi realmente testado e o que falta.

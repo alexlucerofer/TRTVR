@@ -1,0 +1,392 @@
+{
+ "generated_from": "data/demo-data.js",
+ "rules_version": "2026.11.07-1",
+ "companies": [
+  {
+   "key": "horizonte",
+   "name": "Horizonte Serviços de Atendimento Ltda (fictícia)",
+   "domain": "horizonte-atendimento.example",
+   "country": "BR",
+   "registry_id": null,
+   "verification_status": "demonstracao",
+   "source": "Dado fictício de demonstração ELO",
+   "domain_created_on": "2015-03-10",
+   "is_demo": true
+  },
+  {
+   "key": "valeverde",
+   "name": "Cooperativa Agrícola Vale Verde (fictícia)",
+   "domain": "coopvaleverde.example",
+   "country": "BR",
+   "registry_id": null,
+   "verification_status": "demonstracao",
+   "source": "Dado fictício de demonstração ELO",
+   "domain_created_on": "2011-08-01",
+   "is_demo": true
+  },
+  {
+   "key": "goldenbridge",
+   "name": "Golden Bridge International Group (fictícia)",
+   "domain": "goldenbridge-jobs.example",
+   "country": "TH",
+   "registry_id": null,
+   "verification_status": "nao_verificada",
+   "source": "Dado fictício de demonstração ELO",
+   "domain_created_on": "2026-10-20",
+   "is_demo": true
+  },
+  {
+   "key": "siamstar",
+   "name": "Siam Star Recruitment (fictícia)",
+   "domain": null,
+   "country": "TH",
+   "registry_id": null,
+   "verification_status": "inconsistente",
+   "source": "Dado fictício de demonstração ELO — mesmo anúncio com outro nome",
+   "domain_created_on": null,
+   "is_demo": true
+  },
+  {
+   "key": "boasafra",
+   "name": "Agropecuária Boa Safra (fictícia)",
+   "domain": null,
+   "country": "BR",
+   "registry_id": null,
+   "verification_status": "nao_verificada",
+   "source": "Dado fictício de demonstração ELO",
+   "domain_created_on": null,
+   "is_demo": true
+  },
+  {
+   "key": "atlantico",
+   "name": "Hotel Atlântico Lda (fictício)",
+   "domain": "hotelatlantico.example",
+   "country": "PT",
+   "registry_id": null,
+   "verification_status": "demonstracao",
+   "source": "Dado fictício de demonstração ELO",
+   "domain_created_on": "2012-04-20",
+   "is_demo": true
+  },
+  {
+   "key": "desertstar",
+   "name": "Desert Star Talents (fictícia)",
+   "domain": null,
+   "country": "AE",
+   "registry_id": null,
+   "verification_status": "nao_verificada",
+   "source": "Dado fictício de demonstração ELO",
+   "domain_created_on": null,
+   "is_demo": true
+  },
+  {
+   "key": "mekong",
+   "name": "Mekong Digital Marketing (fictícia)",
+   "domain": null,
+   "country": "KH",
+   "registry_id": null,
+   "verification_status": "nao_verificada",
+   "source": "Dado fictício de demonstração ELO",
+   "domain_created_on": null,
+   "is_demo": true
+  },
+  {
+   "key": "pacificbridge",
+   "name": "Pacific Bridge Staffing (fictícia)",
+   "domain": null,
+   "country": "TH",
+   "registry_id": null,
+   "verification_status": "nao_verificada",
+   "source": "Dado fictício de demonstração ELO",
+   "domain_created_on": null,
+   "is_demo": true
+  },
+  {
+   "key": "iberia",
+   "name": "Hostelería Costa Brava S.L. (fictícia)",
+   "domain": "costabrava-hosteleria.example",
+   "country": "ES",
+   "registry_id": null,
+   "verification_status": "demonstracao",
+   "source": "Dado fictício de demonstração ELO",
+   "domain_created_on": "2014-06-11",
+   "is_demo": true
+  },
+  {
+   "key": "recomeco1",
+   "name": "Rede Parceira Recomeço — Logística Aurora (fictícia)",
+   "domain": "logistica-aurora.example",
+   "country": "BR",
+   "registry_id": null,
+   "verification_status": "demonstracao",
+   "source": "Parceira fictícia",
+   "domain_created_on": "2009-01-15",
+   "is_demo": true
+  },
+  {
+   "key": "recomeco2",
+   "name": "Instituto Tecer Futuro (fictício)",
+   "domain": "tecerfuturo.example",
+   "country": "BR",
+   "registry_id": null,
+   "verification_status": "demonstracao",
+   "source": "Parceira fictícia",
+   "domain_created_on": "2018-05-02",
+   "is_demo": true
+  }
+ ],
+ "seenJobs": [
+  {
+   "company": "siamstar",
+   "company_name": "Siam Star Recruitment (fictícia)",
+   "title": "Atendente bilíngue Tailândia — salário em dólar",
+   "location": "Bangkok, Tailândia",
+   "salary": "US$ 2.300",
+   "description": "Vaga de atendimento ao cliente para empresa de investimentos em cripto. Não precisa experiência, treinamento do zero. Passagem aérea paga pela empresa e descontada do salário nos primeiros meses. Envie foto do passaporte pelo WhatsApp. Embarque imediato, vagas limitadas, responda hoje!",
+   "url": "https://elo-demo.local/historico/siam-star-2026-10",
+   "first_seen_at": "2026-10-05T12:00:00Z"
+  }
+ ],
+ "employerRegistry": [
+  {
+   "employer_name": "Agropecuária Boa Safra (fictícia)",
+   "document": null,
+   "uf": "PA",
+   "establishment": "Fazenda fictícia",
+   "workers": 12,
+   "inclusion_date": "2025-10-01",
+   "source": "REGISTRO FICTÍCIO DE DEMONSTRAÇÃO — importe a lista oficial do MTE",
+   "source_url": null,
+   "is_demo": true
+  }
+ ],
+ "opportunities": [
+  {
+   "company": "horizonte",
+   "institution": "Horizonte Serviços de Atendimento Ltda (fictícia)",
+   "title": "Atendente de SAC bilíngue (inglês) — remoto, CLT",
+   "kind": "emprego",
+   "category": "atendimento",
+   "location": "Remoto (Brasil)",
+   "country": "BR",
+   "requirements": "Inglês intermediário; ensino médio",
+   "salary": "R$ 3.600",
+   "url": "https://horizonte-atendimento.example/carreiras",
+   "for_survivors": true,
+   "blind_referral": true,
+   "is_demo": true
+  },
+  {
+   "company": "recomeco1",
+   "institution": "Logística Aurora (fictícia)",
+   "title": "Auxiliar de logística — CLT",
+   "kind": "emprego",
+   "category": "logistica",
+   "location": "Campinas/SP",
+   "country": "BR",
+   "requirements": "Ensino fundamental",
+   "salary": "R$ 2.300 + benefícios",
+   "url": "https://logistica-aurora.example/vagas",
+   "for_survivors": true,
+   "blind_referral": true,
+   "is_demo": true
+  },
+  {
+   "company": "valeverde",
+   "institution": "Cooperativa Agrícola Vale Verde (fictícia)",
+   "title": "Auxiliar agrícola com registro — safra",
+   "kind": "emprego",
+   "category": "agro",
+   "location": "Rio Verde/GO",
+   "country": "BR",
+   "requirements": "Nenhum; treinamento pago",
+   "salary": "R$ 2.600",
+   "url": "https://coopvaleverde.example/vagas",
+   "for_survivors": true,
+   "blind_referral": true,
+   "is_demo": true
+  },
+  {
+   "company": "horizonte",
+   "institution": "Horizonte Serviços de Atendimento Ltda (fictícia)",
+   "title": "Suporte técnico júnior — atendimento em espanhol",
+   "kind": "emprego",
+   "category": "atendimento",
+   "location": "São Paulo/SP",
+   "country": "BR",
+   "requirements": "Espanhol básico",
+   "salary": "R$ 3.100",
+   "url": "https://horizonte-atendimento.example/carreiras",
+   "for_survivors": false,
+   "blind_referral": false,
+   "is_demo": true
+  },
+  {
+   "company": "recomeco2",
+   "institution": "Instituto Tecer Futuro (fictício)",
+   "title": "Curso gratuito de atendimento e informática + encaminhamento",
+   "kind": "capacitacao",
+   "category": "atendimento",
+   "location": "Online",
+   "country": "BR",
+   "requirements": "Nenhum",
+   "salary": "Bolsa-auxílio",
+   "url": "https://tecerfuturo.example",
+   "for_survivors": true,
+   "blind_referral": true,
+   "is_demo": true
+  },
+  {
+   "company": "recomeco2",
+   "institution": "Instituto Tecer Futuro (fictício)",
+   "title": "Programa Recomeço: acompanhamento psicossocial e plano de carreira",
+   "kind": "reintegracao",
+   "category": "reintegracao",
+   "location": "Online e presencial",
+   "country": "BR",
+   "requirements": "Encaminhamento por rede de assistência",
+   "salary": null,
+   "url": "https://tecerfuturo.example/recomeco",
+   "for_survivors": true,
+   "blind_referral": true,
+   "is_demo": true
+  }
+ ],
+ "supportResources": [
+  {
+   "institution": "Disque 100 — Ministério dos Direitos Humanos e da Cidadania",
+   "support_type": "denuncia",
+   "country": "BR",
+   "phone": "100",
+   "official_url": "https://www.gov.br/mdh/pt-br/ondh",
+   "description": "Denúncias de violações de direitos humanos, inclusive tráfico de pessoas e trabalho escravo. Gratuito, 24h.",
+   "checked_at": "2026-11-07"
+  },
+  {
+   "institution": "Ligue 180 — Central de Atendimento à Mulher",
+   "support_type": "denuncia",
+   "country": "BR",
+   "phone": "180",
+   "official_url": "https://www.gov.br/mulheres/pt-br/ligue180",
+   "description": "Atendimento a mulheres em situação de violência, inclusive tráfico e exploração sexual.",
+   "checked_at": "2026-11-07"
+  },
+  {
+   "institution": "Sistema Ipê — Ministério do Trabalho e Emprego",
+   "support_type": "denuncia",
+   "country": "BR",
+   "phone": null,
+   "official_url": "https://ipe.sit.trabalho.gov.br",
+   "description": "Canal oficial para denunciar trabalho análogo ao de escravo; pode ser anônimo.",
+   "checked_at": "2026-11-07"
+  },
+  {
+   "institution": "Ministério Público do Trabalho",
+   "support_type": "denuncia",
+   "country": "BR",
+   "phone": null,
+   "official_url": "https://mpt.mp.br",
+   "description": "Denúncias trabalhistas, incluindo trabalho escravo e aliciamento.",
+   "checked_at": "2026-11-07"
+  },
+  {
+   "institution": "Polícia Federal",
+   "support_type": "denuncia",
+   "country": "BR",
+   "phone": null,
+   "official_url": "https://www.gov.br/pf/pt-br",
+   "description": "Investiga tráfico internacional de pessoas. Em emergência no Brasil: 190.",
+   "checked_at": "2026-11-07"
+  },
+  {
+   "institution": "Itamaraty — Portal Consular (brasileiros no exterior)",
+   "support_type": "emergencia_exterior",
+   "country": "INT",
+   "phone": null,
+   "official_url": "https://www.gov.br/mre/pt-br/assuntos/portal-consular",
+   "description": "Assistência consular e contatos de plantão das embaixadas e consulados.",
+   "checked_at": "2026-11-07"
+  },
+  {
+   "institution": "Embaixada do Brasil em Bangkok",
+   "support_type": "emergencia_exterior",
+   "country": "TH",
+   "phone": null,
+   "official_url": "https://www.gov.br/mre/pt-br/embaixada-bangkok",
+   "description": "Atende brasileiros na Tailândia (verifique na página o plantão consular).",
+   "checked_at": "2026-11-07"
+  },
+  {
+   "institution": "Ministério da Justiça — Enfrentamento ao Tráfico de Pessoas",
+   "support_type": "orientacao",
+   "country": "BR",
+   "phone": null,
+   "official_url": "https://www.gov.br/mj/pt-br/assuntos/sua-protecao/trafico-de-pessoas",
+   "description": "Política nacional, Núcleos de Enfrentamento e Postos Avançados de atendimento humanizado ao migrante.",
+   "checked_at": "2026-11-07"
+  },
+  {
+   "institution": "OIM — Organização Internacional para as Migrações (Brasil)",
+   "support_type": "assistencia",
+   "country": "INT",
+   "phone": null,
+   "official_url": "https://brazil.iom.int",
+   "description": "Apoio a migrantes e vítimas de tráfico, incluindo retorno voluntário e reintegração.",
+   "checked_at": "2026-11-07"
+  },
+  {
+   "institution": "Seguro-desemprego do trabalhador resgatado (Lei 10.608/2002)",
+   "support_type": "reintegracao",
+   "country": "BR",
+   "phone": null,
+   "official_url": "https://www.planalto.gov.br/ccivil_03/leis/2002/l10608.htm",
+   "description": "Trabalhadores resgatados de condição análoga à de escravo têm direito a três parcelas de seguro-desemprego.",
+   "checked_at": "2026-11-07"
+  },
+  {
+   "institution": "Assistência social — CRAS/CREAS (MDS)",
+   "support_type": "reintegracao",
+   "country": "BR",
+   "phone": null,
+   "official_url": "https://www.gov.br/mds/pt-br",
+   "description": "Rede pública de assistência social para acolhimento e encaminhamento.",
+   "checked_at": "2026-11-07"
+  },
+  {
+   "institution": "SINE / Portal Emprega Brasil (governo federal)",
+   "support_type": "portal_emprego",
+   "country": "BR",
+   "phone": null,
+   "official_url": "https://www.gov.br/pt-br/servicos/buscar-emprego-no-sistema-nacional-de-emprego-sine",
+   "description": "Vagas do Sistema Nacional de Emprego, gratuito. Também nos postos do SINE da sua cidade.",
+   "checked_at": "2026-11-07"
+  },
+  {
+   "institution": "EURES — Portal Europeu da Mobilidade Profissional (União Europeia)",
+   "support_type": "portal_emprego",
+   "country": "INT",
+   "phone": null,
+   "official_url": "https://eures.europa.eu",
+   "description": "Portal oficial de vagas nos países da União Europeia. Verifique sempre as regras de visto do país.",
+   "checked_at": "2026-11-07"
+  },
+  {
+   "institution": "IEFP — Instituto do Emprego e Formação Profissional (Portugal)",
+   "support_type": "portal_emprego",
+   "country": "INT",
+   "phone": null,
+   "official_url": "https://iefponline.iefp.pt",
+   "description": "Serviço público de emprego de Portugal.",
+   "checked_at": "2026-11-07"
+  },
+  {
+   "institution": "Job Bank — Governo do Canadá",
+   "support_type": "portal_emprego",
+   "country": "INT",
+   "phone": null,
+   "official_url": "https://www.jobbank.gc.ca",
+   "description": "Portal oficial de vagas do Canadá, com indicação de vagas abertas a estrangeiros.",
+   "checked_at": "2026-11-07"
+  }
+ ]
+}
